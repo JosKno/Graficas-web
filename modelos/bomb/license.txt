@@ -1,0 +1,11 @@
+Model Information:
+* title:	Round Bomb
+* source:	https://sketchfab.com/3d-models/round-bomb-2148b02dd8c948f797903f75988d8717
+* author:	Rectus (https://sketchfab.com/rectus)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Round Bomb" (https://sketchfab.com/3d-models/round-bomb-2148b02dd8c948f797903f75988d8717) by Rectus (https://sketchfab.com/rectus) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

@@ -234,7 +234,7 @@ export function createTrees() {
     { x: 9, side: 'right' }    // Solo uno a la derecha
   ];
 
-  for (let z = 0; z > -200; z -= 30) {
+  for (let z = 0; z > -200; z -= 15) {
     treePositions.forEach(pos => {
       spawnTree(pos.x, z);
     });
@@ -282,8 +282,7 @@ export function loadRunner(onComplete) {
         
         // Buscar animación de saltar
         const jumpAnimation = model.animations.find(anim => 
-          anim.name.toLowerCase().includes('jump') ||
-          anim.name.toLowerCase().includes('leap')
+          anim.name.toLowerCase().includes('jump') 
         );
         
         if (runAnimation) {

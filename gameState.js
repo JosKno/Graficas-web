@@ -29,6 +29,7 @@ class GameState {
     // Estado del juego
     this.isPaused = false;
     this.isGameStarted = false;
+    this.isGameOver = false;
     this.isJumping = false;
     this.jumpVelocity = 0;
     this.runnerGroundY = 0;
@@ -42,8 +43,10 @@ class GameState {
     this.coins = [];
     this.powerupsGood = [];
     this.powerupsBad = [];
+    this.bombs = [];
     this.groundSegments = [];
     this.trees = [];
+    this.explosions = [];
     
     // Puntuación
     this.score = 0;
@@ -54,6 +57,7 @@ class GameState {
     this.lastCoinZ = GAME_CONFIG.spawnDistance;
     this.lastPowerupGoodZ = GAME_CONFIG.spawnDistance;
     this.lastPowerupBadZ = GAME_CONFIG.spawnDistance;
+    this.lastBombZ = GAME_CONFIG.spawnDistance;
     
     // Velocidad del juego (se actualiza desde levelConfig)
     this.gameSpeed = GAME_CONFIG.gameSpeed || 0.15;
@@ -81,6 +85,23 @@ class GameState {
     
     if (scoreElement) scoreElement.textContent = this.score;
     if (fragmentsElement) fragmentsElement.textContent = this.fragments;
+  }
+  
+  showHUDEffect(text, color = '#00ff00') {
+    const effectsElement = document.getElementById('effects');
+    if (!effectsElement) return;
+    
+    effectsElement.textContent = text;
+    effectsElement.style.color = color;
+    effectsElement.style.fontWeight = '700';
+    effectsElement.style.textShadow = `0 0 10px ${color}`;
+    effectsElement.style.animation = 'hudPulse 0.3s ease-out';
+    
+    // Limpiar después de 1.5 segundos
+    setTimeout(() => {
+      effectsElement.textContent = '';
+      effectsElement.style.animation = '';
+    }, 1500);
   }
   
   startJump() {

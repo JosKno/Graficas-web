@@ -7,6 +7,15 @@ import gameState from './gameState.js';
 export function setupControls() {
   // Controles de teclado
   document.addEventListener('keydown', (e) => {
+    if (gameState.isGameOver) return;
+    
+    // Tecla ESC para pausar
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      togglePause();
+      return;
+    }
+    
     if (gameState.isPaused || !gameState.isGameStarted) return;
 
     if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
@@ -55,10 +64,22 @@ export function setupControls() {
   });
 }
 
+export function togglePause() {
+  if (gameState.isGameOver) return;
+  
+  gameState.isPaused = !gameState.isPaused;
+  const pauseMenu = document.getElementById('pause-menu');
+  
+  if (pauseMenu) {
+    pauseMenu.style.display = gameState.isPaused ? 'flex' : 'none';
+  }
+}
+
 export function setupPauseButton() {
   const pauseButton = document.getElementById('pause-button');
   const pauseMenu = document.getElementById('pause-menu');
   const resumeButton = document.getElementById('resume-button');
+  const restartButton = document.getElementById('restart-button');
 
   if (!pauseButton || !pauseMenu || !resumeButton) {
     console.warn('No se encontraron elementos de pausa');
@@ -66,12 +87,17 @@ export function setupPauseButton() {
   }
 
   pauseButton.addEventListener('click', () => {
-    gameState.isPaused = true;
-    pauseMenu.style.display = 'flex';
+    togglePause();
   });
 
   resumeButton.addEventListener('click', () => {
-    gameState.isPaused = false;
-    pauseMenu.style.display = 'none';
+    togglePause();
   });
+  
+  // Botón de reiniciar
+  if (restartButton) {
+    restartButton.addEventListener('click', () => {
+      window.location.reload();
+    });
+  }
 }

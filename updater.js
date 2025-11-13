@@ -2,8 +2,10 @@
 // SISTEMA DE ACTUALIZACIÓN DE OBJETOS
 // ============================================
 
+import * as THREE from "three";
 import { GAME_CONFIG } from './config.js';
 import gameState from './gameState.js';
+import { showGameOver, createExplosion, updateExplosions } from './gameOver.js';
 
 export function updateRunner(delta) {
   if (!gameState.runner) return;
@@ -57,10 +59,10 @@ export function updateObstacles() {
       obj.mesh.position.z += gameState.gameSpeed;
       
       // Detectar colisión solo si no está saltando o está muy bajo
-      if (gameState.runner && !gameState.isJumping) {
+      if (gameState.runner && !gameState.isJumping && !gameState.isGameOver) {
         if (checkCollision(obj.mesh.position, gameState.runner.position, 2)) {
-          console.log('¡Colisión con obstáculo! Game Over');
-          // TODO: Implementar game over
+          console.log('¡Colisión con obstáculo!');
+          showGameOver('Chocaste con un obstáculo');
         }
       }
 
@@ -82,11 +84,12 @@ export function updateCoins() {
       coin.mesh.rotation.y = coin.rotation;
     }
 
-    if (gameState.runner && checkCollision(coin.mesh.position, gameState.runner.position)) {
+    if (gameState.runner && !gameState.isGameOver && checkCollision(coin.mesh.position, gameState.runner.position)) {
       gameState.scene.remove(coin.mesh);
       gameState.coins.splice(i, 1);
       gameState.updateFragments(GAME_CONFIG.scores.coinFragments);
       gameState.updateScore(GAME_CONFIG.scores.coin);
+      gameState.showHUDEffect('+100', '#ffd700');
       console.log('¡Moneda recogida! +' + GAME_CONFIG.scores.coin + ' puntos');
       continue;
     }
@@ -109,10 +112,16 @@ export function updatePowerupsGood() {
       powerup.mesh.position.y = powerup.baseY + Math.sin(Date.now() * 0.003) * 0.3;
     }
 
-    if (gameState.runner && checkCollision(powerup.mesh.position, gameState.runner.position)) {
+    if (gameState.runner && !gameState.isGameOver && checkCollision(powerup.mesh.position, gameState.runner.position)) {
+      // Crear partículas verdes
+      const explosion = createExplosion(powerup.mesh.position, 0x00ff00);
+      gameState.scene.add(explosion.particles);
+      gameState.explosions.push(explosion);
+      
       gameState.scene.remove(powerup.mesh);
       gameState.powerupsGood.splice(i, 1);
       gameState.updateScore(GAME_CONFIG.scores.powerupGood);
+      gameState.showHUDEffect('+500', '#00ff00');
       console.log('¡PowerUp recogido! +' + GAME_CONFIG.scores.powerupGood + ' puntos');
       continue;
     }
@@ -136,10 +145,16 @@ export function updatePowerupsBad() {
       powerup.mesh.position.y = powerup.baseY + Math.sin(Date.now() * 0.003) * 0.3;
     }
 
-    if (gameState.runner && checkCollision(powerup.mesh.position, gameState.runner.position)) {
+    if (gameState.runner && !gameState.isGameOver && checkCollision(powerup.mesh.position, gameState.runner.position)) {
+      // Crear partículas rojas de daño
+      const explosion = createExplosion(powerup.mesh.position, 0xff0000);
+      gameState.scene.add(explosion.particles);
+      gameState.explosions.push(explosion);
+      
       gameState.scene.remove(powerup.mesh);
       gameState.powerupsBad.splice(i, 1);
       gameState.updateScore(GAME_CONFIG.scores.powerupBad);
+      gameState.showHUDEffect('-1000', '#ff0000');
       console.log('¡PowerUp malo! ' + GAME_CONFIG.scores.powerupBad + ' puntos');
       continue;
     }
@@ -151,8 +166,41 @@ export function updatePowerupsBad() {
   }
 }
 
+export function updateBombs() {
+  for (let i = gameState.bombs.length - 1; i >= 0; i--) {
+    const bomb = gameState.bombs[i];
+    bomb.mesh.position.z += gameState.gameSpeed;
+    bomb.rotation += 0.05;
+    bomb.mesh.rotation.y = bomb.rotation;
+
+    if (gameState.runner && !gameState.isGameOver && checkCollision(bomb.mesh.position, gameState.runner.position, 1.8)) {
+      // Crear explosión grande
+      const explosion = createExplosion(bomb.mesh.position, 0xff4500);
+      gameState.scene.add(explosion.particles);
+      gameState.explosions.push(explosion);
+      
+      gameState.scene.remove(bomb.mesh);
+      gameState.bombs.splice(i, 1);
+      
+      console.log('¡Explosión de bomba!');
+      
+      // Game over con delay para ver la explosión
+      setTimeout(() => {
+        showGameOver('¡Explotaste con una bomba!');
+      }, 300);
+      
+      continue;
+    }
+
+    if (bomb.mesh.position.z > GAME_CONFIG.despawnDistance) {
+      gameState.scene.remove(bomb.mesh);
+      gameState.bombs.splice(i, 1);
+    }
+  }
+}
+
 export function updateAll(delta) {
-  if (!gameState.isGameStarted) return;
+  if (!gameState.isGameStarted || gameState.isGameOver) return;
   
   updateRunner(delta);
   updateGround();
@@ -161,6 +209,10 @@ export function updateAll(delta) {
   updateCoins();
   updatePowerupsGood();
   updatePowerupsBad();
+  updateBombs();
+  
+  // Actualizar explosiones/partículas
+  updateExplosions(gameState.explosions, gameState.scene, delta);
 
   // Incrementar puntuación por distancia
   gameState.score += GAME_CONFIG.scores.distancePerFrame;

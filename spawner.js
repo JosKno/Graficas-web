@@ -258,8 +258,63 @@ export function spawnPowerupBad() {
   );
 }
 
+export function spawnBomb() {
+  const levelConfig = gameState.levelConfig;
+  
+  loader.load(
+    levelConfig.bomb.path,
+    (model) => {
+      const bomb = model.scene;
+      bomb.scale.set(
+        levelConfig.bomb.scale.x,
+        levelConfig.bomb.scale.y,
+        levelConfig.bomb.scale.z
+      );
+      
+      const randomLane = GAME_CONFIG.lanes[Math.floor(Math.random() * GAME_CONFIG.lanes.length)];
+      bomb.position.set(
+        randomLane, 
+        levelConfig.bomb.yOffset, 
+        GAME_CONFIG.spawnDistance
+      );
+      
+      // Agregar brillo rojo intenso a la bomba
+      addEmissiveToModel(bomb, levelConfig.bomb.emissiveColor, levelConfig.bomb.emissiveIntensity);
+      
+      gameState.scene.add(bomb);
+      gameState.bombs.push({ 
+        mesh: bomb, 
+        type: 'bomb', 
+        lane: randomLane, 
+        rotation: 0
+      });
+    },
+    undefined,
+    (error) => {
+      console.warn('No se pudo cargar bomba, usando fallback');
+      const tempGeometry = new THREE.SphereGeometry(0.6, 16, 16);
+      const tempMaterial = new THREE.MeshStandardMaterial({ 
+        color: "#000000",
+        emissive: 0xff0000,
+        emissiveIntensity: 2.0
+      });
+      const tempBomb = new THREE.Mesh(tempGeometry, tempMaterial);
+      const randomLane = GAME_CONFIG.lanes[Math.floor(Math.random() * GAME_CONFIG.lanes.length)];
+      tempBomb.position.set(randomLane, 1, GAME_CONFIG.spawnDistance);
+      tempBomb.castShadow = true;
+      gameState.scene.add(tempBomb);
+      gameState.bombs.push({ 
+        mesh: tempBomb, 
+        type: 'bomb', 
+        lane: randomLane, 
+        rotation: 0
+      });
+    }
+  );
+}
+
 export function spawnObjects() {
-  if (!gameState.isGameStarted || !gameState.levelConfig) return;
+  if (!gameState.isGameStarted || !gameState.levelConfig || gameState.isGameOver) return;
   
   const spawnRates = gameState.levelConfig.spawnRates;
   
@@ -281,5 +336,10 @@ export function spawnObjects() {
   // Spawn powerups malos (MUY RAROS)
   if (Math.random() < spawnRates.powerupBad) {
     spawnPowerupBad();
+  }
+  
+  // Spawn bombas (EXTREMADAMENTE RAROS)
+  if (Math.random() < spawnRates.bomb) {
+    spawnBomb();
   }
 }

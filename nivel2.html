@@ -53,10 +53,20 @@
       <h3 class="pause-title">PAUSA - NIVEL 2</h3>
       <div class="pause-buttons-container">
         <button id="resume-button" class="pause-button-action">REANUDAR</button>
+        <button id="restart-button" class="pause-button-action">REINICIAR</button>
         <a href="index.html" class="pause-button-action">SALIR</a>
       </div>
     </div>
   </div>
+
+  <!-- Estilos para animaciones del HUD -->
+  <style>
+    @keyframes hudPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+  </style>
 
   <!-- Script principal del juego - ORDEN CORRECTO -->
   <script type="module">

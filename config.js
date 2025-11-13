@@ -13,7 +13,7 @@ export const LEVEL_1_CONFIG = {
     yOffset: 0
   },
   coin: {
-    path: "./modelos/coin/scene.gltf",
+     path: "./modelos/coin/scene.gltf",
     scale: { x: 0.05, y: 0.05, z: 0.05 },
     yOffset: 1.5,
     rotate: true,
@@ -29,8 +29,8 @@ export const LEVEL_1_CONFIG = {
     emissiveIntensity: 2.0
   },
   powerupBad: {
-    path: "./modelos/poison/scene.gltf",
-    scale: { x: 0.5, y: 0.5, z: 0.5 },
+    path: "./modelos/powerup_bad/scene.gltf",
+    scale: { x: 0.7, y: 0.7, z: 0.7 },
     yOffset: 1.5,
     float: true,
     emissiveColor: 0xff0000,
@@ -46,7 +46,14 @@ export const LEVEL_1_CONFIG = {
     scale: { x: 0.02, y: 0.02, z: 0.02 },
     yOffset: 0
   },
-  background: "./img/cielo.png",
+  bomb: {
+    path: "./modelos/bomb/scene.gltf",
+    scale: { x: 1.6, y: 1.6, z: 1.6 },
+    yOffset: 1,
+    emissiveColor: 0xff0000,
+    emissiveIntensity: 2.0
+  },
+  background: "./imagenes/bosque_fondo.jpg",
   terrain: {
     road: "#8B4513",    // Café tierra
     grass: "#228B22",   // Verde pasto
@@ -62,7 +69,8 @@ export const LEVEL_1_CONFIG = {
     obstacle: 0.01,
     coin: 0.025,
     powerupGood: 0.0015,
-    powerupBad: 0.0005
+    powerupBad: 0.0005,
+    bomb: 0.0002          // MUY RARO - 0.02% de probabilidad
   }
 };
 
@@ -77,7 +85,6 @@ export const LEVEL_2_CONFIG = {
     yOffset: 1,
     emissiveColor: 0x00ffff,      // Cyan neón brillante
     emissiveIntensity: 1.5
-    
   },
   coin: {
     path: "./modelos/coin/scene.gltf",
@@ -96,8 +103,8 @@ export const LEVEL_2_CONFIG = {
     emissiveIntensity: 2.0
   },
   powerupBad: {
-    path: "./modelos/poison/scene.gltf",
-    scale: { x: 0.5, y: 0.5, z: 0.5 },
+    path: "./modelos/powerup_bad/scene.gltf",
+    scale: { x: 0.7, y: 0.7, z: 0.7 },
     yOffset: 1.5,
     float: true,
     emissiveColor: 0xff0000,
@@ -110,12 +117,19 @@ export const LEVEL_2_CONFIG = {
     emissiveColor: 0x9B59B6,      // Morado neón
     emissiveIntensity: 0.2
   },
-   runner: {
+  runner: {
     path: "./modelos/runner/scene.gltf",
     scale: { x: 0.02, y: 0.02, z: 0.02 },
     yOffset: 0
   },
-  background: "./img/fondociu.jpg",
+  bomb: {
+    path: "./modelos/bomb/scene.gltf",
+   scale: { x: 1.6, y: 1.6, z: 1.6 },
+    yOffset: 1,
+    emissiveColor: 0xff4500,
+    emissiveIntensity: 2.5
+  },
+  background: "./imagenes/ciudad_fondo.jpg",
   terrain: {
     road: "#2C3E50",    // Asfalto oscuro
     grass: "#34495E",   // Acera gris oscura
@@ -126,7 +140,7 @@ export const LEVEL_2_CONFIG = {
     near: 30,
     far: 100
   },
-  // Efectos especiales para este nivel
+   // Efectos especiales para este nivel
   neonEffect: true,        // Activa efectos neón
   ambientLightColor: 0x4a148c,  // Luz ambiental morada
   ambientLightIntensity: 0.3,
@@ -135,7 +149,8 @@ export const LEVEL_2_CONFIG = {
     obstacle: 0.015,      // 40% más obstáculos
     coin: 0.025,
     powerupGood: 0.001,
-    powerupBad: 0.0010    // 100% más power-ups malos
+    powerupBad: 0.0010,    // 100% más power-ups malos
+    bomb: 0.0003          // Un poco más frecuente que nivel 1
   }
 };
 
@@ -145,7 +160,7 @@ export const LEVEL_2_CONFIG = {
 export const LEVEL_3_CONFIG = {
   name: "Volcán Infernal",
   obstacle: {
-    path: "./modelos/crystal/scene.gltf",
+   path: "./modelos/crystal/scene.gltf",
     scale: { x: 7, y: 10, z:8 },
     yOffset: 0
   },
@@ -178,12 +193,19 @@ export const LEVEL_3_CONFIG = {
     scale: { x: 1, y: 1, z: 1},
     yOffset: 0
   },
-   runner: {
+  runner: {
     path: "./modelos/runner/scene.gltf",
     scale: { x: 0.02, y: 0.02, z: 0.02 },
     yOffset: 0
   },
-  background: "./img/fondovolo.jpg",
+  bomb: {
+    path: "./modelos/bomb/scene.gltf",
+    scale: { x: 1.6, y: 1.6, z: 1.6 },
+    yOffset: 1,
+    emissiveColor: 0xff6347,
+    emissiveIntensity: 3.0
+  },
+  background: "./imagenes/volcan_fondo.jpg",
   terrain: {
     road: "#3D0000",    // Rojo oscuro lava solidificada
     grass: "#8B0000",   // Rojo sangre (lava lateral)
@@ -199,7 +221,8 @@ export const LEVEL_3_CONFIG = {
     obstacle: 0.02,      // 75% más obstáculos
     coin: 0.025,
     powerupGood: 0.0008,
-    powerupBad: 0.0015    // 200% más power-ups malos
+    powerupBad: 0.0015,    // 200% más power-ups malos
+    bomb: 0.0004          // Más frecuente (nivel difícil)
   }
 };
 
@@ -228,10 +251,10 @@ export const GAME_CONFIG = {
   },
   
   // Salto
- jump: {
+  jump: {
     height: 3,     
     duration: 0.5,    
-    gravity: 20       
+    gravity: 20       // Aumentado de 15 a 20 (cae más rápido)
   },
   
   // Contador inicial
