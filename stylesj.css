@@ -1,0 +1,125 @@
+body {
+    background-image: url('img/fondo.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: #0d1223;
+
+    font-family: 'Rajdhani', sans-serif;
+    color: #fff;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centra el contenido verticalmente */
+    align-items: center; /* Centra el contenido horizontalmente */
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+}
+
+body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 1;
+}
+
+.main-container {
+    text-align: center;
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 60px;
+    margin: 0; /* Eliminamos el margen superior para centrar */
+}
+
+.screen-title {
+    font-size: 3.5rem;
+    color: #00e0b3;
+    text-shadow: 0 0 15px #00e0b3;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    margin-bottom: 30px; /* Añade un margen en la parte inferior para separarlo de las cards */
+}
+
+.card-container {
+    display: flex;
+    gap: 60px;
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 350px;
+    height: 480px;
+    
+    background-color: rgba(0, 0, 0, 0.5);
+    border: 3px solid #00e0b3;
+    border-radius: 15px;
+    text-decoration: none;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+}
+
+.card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 30px #00e0b3;
+    background-color: #00e0b3;
+}
+
+.card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+}
+
+.card-icon {
+    width: 150px;
+    height: auto;
+    filter: drop-shadow(0 0 8px #00e0b3);
+    transition: filter 0.3s ease;
+}
+
+.card-text {
+    font-size: 2.5rem;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    text-shadow: 0 0 8px #fff;
+}
+
+.back-button {
+    font-size: 1.8rem;
+    text-decoration: none;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    transition: color 0.3s ease, text-shadow 0.3s ease;
+     /* Añade un margen superior para separarlo de las cards */
+}
+
+.back-button:hover {
+    color: #00e0b3;
+    text-shadow: 0 0 15px #00e0b3;
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+body.fade-in {
+    animation: fade-in 1s ease-in-out forwards;
+}

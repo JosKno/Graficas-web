@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chrono-Dash: Infinity Run - Menú Principal</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Trebuchet MS', sans-serif;
+      background: url('https://img2.rtve.es/n/2222180') no-repeat center center fixed;
+      background-size: cover;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .menu {
+      background: rgba(0, 0, 0, 0.7);
+      padding: 30px;
+      border-radius: 20px;
+      text-align: center;
+      color: white;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
+    }
+
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 20px;
+      color: gold;
+      text-shadow: 2px 2px 5px black;
+    }
+
+    img {
+      width: 200px;
+      margin-bottom: 20px;
+    }
+
+    button {
+      display: block;
+      width: 220px;
+      margin: 10px auto;
+      padding: 15px;
+      font-size: 1.2em;
+      border: none;
+      border-radius: 10px;
+      background: goldenrod;
+      color: white;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: darkorange;
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <div class="menu">
+    <h1>Arqueólogo Runner</h1>
+    <img src="C:\Users\jttur\OneDrive\Documentos\semestre 8\graficas computacionales\arqueologo.png" alt="Arqueólogo">
+    
+    <button onclick="jugar()">▶ Jugar</button>
+    <button onclick="window.location.href='opciones.html'">⚙ Opciones</button>
+    <button onclick="salir()">❌ Salir</button>
+  </div>
+
+  <script>
+    function jugar() {
+      alert("¡El juego comienza! 🏃‍♂️💨");
+    }
+
+    function salir() {
+      let confirmar = confirm("¿Seguro que quieres salir?");
+      if (confirmar) {
+        alert("Saliendo del juego...");
+        window.close();
+      }
+    }
+  </script>
+</body>
+</html>

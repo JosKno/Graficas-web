@@ -1,0 +1,95 @@
+body {
+    /* Fondo: la imagen de la silueta y las líneas */
+    background-image: url('img/fondo2.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: #0d1223; /* Un color de respaldo azul muy oscuro */
+
+    /* Fuente cambiada para ser más similar a la imagen generada */
+    font-family: 'Rajdhani', sans-serif;
+    color: #fff;
+    margin: 0;
+    display: flex;
+    justify-content: flex-start; /* Alinea al inicio del eje principal (horizontal) */
+    align-items: center; /* Centra verticalmente */
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Oscurece el fondo para mejorar la legibilidad del texto */
+body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4); /* Un poco más oscuro que antes para el contraste */
+    z-index: 1;
+}
+
+.main-container {
+    position: relative;
+    z-index: 2;
+    /* Ajusta la posición de todo el contenedor para que esté más abajo y a la derecha */
+    margin-left: 55%; /* Mueve el contenido más a la derecha, para dejar espacio a la silueta */
+    margin-top: 20vh; /* Mueve el contenido más abajo */
+    text-align: left; /* Alinea el texto a la izquierda dentro de su contenedor */
+    transform: translateY(-50%); /* Ajuste fino para centrado vertical relativo */
+}
+
+.game-title {
+    font-size: 3.8rem; /* Tamaño de fuente ligeramente más grande */
+    color: #00e0b3; /* Color verde de las líneas de luz */
+    text-shadow: 0 0 12px #00e0b3, 0 0 25px #00e0b3; /* Sombra más pronunciada */
+    letter-spacing: 6px; /* Espaciado entre letras ligeramente mayor */
+    margin-bottom: 45px; /* Espacio debajo del título */
+    animation: pulse 2s infinite alternate;
+    text-transform: uppercase; /* Asegura que el título esté en mayúsculas */
+}
+
+@keyframes pulse {
+    from {
+        text-shadow: 0 0 12px #00e0b3, 0 0 25px #00e0b3;
+    }
+    to {
+        text-shadow: 0 0 18px #00e0b3, 0 0 30px #00e0b3, 0 0 35px #00e0b3;
+    }
+}
+
+.main-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.menu-item {
+    font-size: 1.8rem; /* Tamaño de fuente ligeramente más grande para las opciones */
+    text-decoration: none;
+    color: #fff;
+    display: block;
+    padding: 12px 0; /* Espaciado vertical un poco menor entre opciones */
+    transition: color 0.3s ease, text-shadow 0.3s ease;
+    letter-spacing: 3px; /* Espaciado entre letras para las opciones */
+    text-transform: uppercase; /* Opciones en mayúsculas */
+}
+
+.menu-item:hover {
+    color: #00e0b3; /* Mismo verde que el título */
+    text-shadow: 0 0 10px #00e0b3;
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+body.fade-in {
+    animation: fade-in 1s ease-in-out forwards;
+}

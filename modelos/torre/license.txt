@@ -1,0 +1,11 @@
+Model Information:
+* title:	Isometric building (low poly)
+* source:	https://sketchfab.com/3d-models/isometric-building-low-poly-1e7e62869e1e4006a31c410eeecd7f7c
+* author:	daviddickball (https://sketchfab.com/daviddickball)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Isometric building (low poly)" (https://sketchfab.com/3d-models/isometric-building-low-poly-1e7e62869e1e4006a31c410eeecd7f7c) by daviddickball (https://sketchfab.com/daviddickball) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

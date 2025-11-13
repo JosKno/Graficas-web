@@ -1,0 +1,306 @@
+body {
+    background-image: url('img/fondo.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: #0d1223;
+    font-family: 'Rajdhani', sans-serif;
+    color: #fff;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+}
+
+body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 1;
+}
+
+.main-container {
+    text-align: center;
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.screen-title {
+    font-size: 3.5rem;
+    color: #00e0b3;
+    text-shadow: 0 0 15px #00e0b3;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    margin-bottom: 50px;
+}
+
+.config-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.config-menu li {
+    margin-bottom: 20px;
+}
+
+/* Estilos para los elementos de Audio y Dificultad */
+.menu-item-toggle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 400px;
+    padding: 15px 30px;
+    background-color: rgba(0, 0, 0, 0.4);
+    border: 2px solid rgba(0, 224, 179, 0.5);
+    border-radius: 5px;
+    letter-spacing: 2px;
+}
+
+.menu-text {
+    font-size: 1.8rem;
+    text-transform: uppercase;
+    color: #fff;
+}
+
+.toggle-button {
+    font-size: 1.4rem;
+    padding: 8px 15px;
+    background-color: #00e0b3;
+    border: none;
+    border-radius: 5px;
+    color: #0d1223;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.toggle-button:hover {
+    background-color: #00ffc8;
+    box-shadow: 0 0 10px #00e0b3;
+}
+
+.menu-item {
+    font-size: 1.8rem;
+    text-decoration: none;
+    color: #fff;
+    display: block;
+    padding: 15px 30px;
+    transition: color 0.3s ease, text-shadow 0.3s ease, background-color 0.3s ease;
+    letter-spacing: 2px;
+    background-color: rgba(0, 0, 0, 0.4);
+    border: 2px solid rgba(0, 224, 179, 0.5);
+    border-radius: 5px;
+}
+
+.menu-item:hover {
+    color: #0d1223;
+    background-color: #00e0b3;
+    text-shadow: none;
+    box-shadow: 0 0 15px #00e0b3;
+    transform: scale(1.05);
+}
+
+.back-button {
+    font-size: 1.8rem;
+    text-decoration: none;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    transition: color 0.3s ease, text-shadow 0.3s ease;
+    margin-top: 50px;
+}
+
+.back-button:hover {
+    color: #00e0b3;
+    text-shadow: 0 0 15px #00e0b3;
+}
+
+/* Estilos de la lista de puntuaciones */
+.scores-list {
+    list-style: none;
+    padding: 30px 60px;
+    background-color: rgba(0, 0, 0, 0.4);
+    border: 2px solid #00e0b3;
+    border-radius: 10px;
+    text-align: left;
+}
+
+.scores-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.score-rank {
+    font-size: 1.5rem;
+    color: #00e0b3;
+    margin-right: 20px;
+}
+
+.score-name {
+    font-size: 1.5rem;
+    flex-grow: 1;
+    color: #fff;
+    text-transform: uppercase;
+    margin-right: 50px; /* Aumenta el margen para separar el nombre */
+}
+
+.score-value {
+    font-size: 1.5rem;
+    color: #fff;
+    text-shadow: 0 0 8px #00e0b3;
+}
+
+/* ... código anterior ... */
+
+.controls-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+}
+
+.control-group {
+    text-align: center;
+}
+
+.control-text {
+    font-size: 1.5rem;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+}
+
+.keys-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.key-icon {
+    font-size: 1.8rem;
+    padding: 10px 20px;
+    background-color: rgba(0, 0, 0, 0.6);
+    border: 2px solid #00e0b3;
+    border-radius: 5px;
+    color: #fff;
+    text-transform: uppercase;
+    text-shadow: 0 0 10px #00e0b3;
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+body.fade-in {
+    animation: fade-in 1s ease-in-out forwards;
+}
+
+/* Nuevo Bloque: Integración de Red Social */
+.social-integration {
+    margin-top: 50px;
+    width: 500px;
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.4);
+    border: 2px solid #00e0b3;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.social-text {
+    font-size: 1.2rem;
+    color: #fff;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin: 0;
+}
+
+.social-button {
+    font-size: 1.4rem;
+    padding: 10px 20px;
+    background-color: #1DA1F2; /* Color de X/Twitter */
+    border: 2px solid #1DA1F2;
+    border-radius: 5px;
+    color: #fff;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 10px rgba(29, 161, 242, 0.5);
+}
+
+.social-button:hover {
+    background-color: #1a94e3;
+    box-shadow: 0 0 15px #1DA1F2;
+    transform: scale(1.05);
+}
+
+.social-status {
+    min-height: 1.2rem;
+    font-size: 1.0rem;
+    font-weight: 700;
+    color: #00e0b3;
+}
+
+.social-feed-title {
+    font-size: 1.8rem;
+    color: #fff;
+    text-shadow: 0 0 8px #fff;
+    margin: 20px 0 10px 0;
+}
+
+.social-feed {
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+/* Estilo para un post simulado (requisito "leer publicaciones") */
+.post-item {
+    background-color: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(0, 224, 179, 0.5);
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.post-user {
+    font-size: 1.1rem;
+    color: #00e0b3;
+    font-weight: 700;
+    margin: 0 0 5px 0;
+}
+
+.post-content {
+    font-size: 1rem;
+    color: #fff;
+    margin: 0;
+}

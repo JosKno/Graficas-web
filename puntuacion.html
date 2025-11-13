@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chrono-Dash: Puntuaciones</title>
+    <link rel="stylesheet" href="stylesg.css">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="main-container">
+        <h2 class="screen-title">PUNTUACIONES</h2>
+        <ul class="scores-list">
+            <li><span class="score-rank">1.</span> <span class="score-name">JOSÉ ALBERTO</span> <span class="score-value" data-score="12450">12450</span></li>
+            <li><span class="score-rank">2.</span> <span class="score-name">DIEGO</span> <span class="score-value" data-score="9875">9875</span></li>
+            <li><span class="score-rank">3.</span> <span class="score-name">JOSUE</span> <span class="score-value" data-score="8500">8500</span></li>
+            <li><span class="score-rank">4.</span> <span class="score-name">JUGADOR 4</span> <span class="score-value" data-score="7250">7250</span></li>
+            <li><span class="score-rank">5.</span> <span class="score-name">JUGADOR 5</span> <span class="score-value" data-score="6100">6100</span></li>
+        </ul>
+        
+        <div class="social-integration">
+            <p class="social-text">¡Comparte tu mejor puntuación en X!</p>
+            <button id="share-score-button" class="social-button">
+                COMPARTIR PUNTUACIÓN
+            </button>
+            <div id="social-status" class="social-status"></div>
+
+            <h3 class="social-feed-title">Publicaciones del Juego</h3>
+            <div id="social-feed" class="social-feed">
+                <div class="post-item">
+                    <p class="post-user">@UsuarioEjemplo</p>
+                    <p class="post-content">¡Acabo de superar mi mejor marca en Chrono-Dash con 13000 puntos! 🚀</p>
+                </div>
+            </div>
+        </div>
+        <a href="index.html" class="back-button">REGRESAR</a>
+    </div>
+<script src="social.js"></script>
+<script>
+    document.body.classList.add('fade-in');
+</script>
+</body>
+</html>

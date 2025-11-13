@@ -1,0 +1,8 @@
+Model Information:
+* title:	Kazurka - Animated
+* source:	https://sketchfab.com/3d-models/kazurka-animated-a436daf31a44424c9a0094ed714fc557
+* author:	Seyquil (https://sketchfab.com/Leyde)
+
+Model License:
+* license type:	SKETCHFAB Standard (https://sketchfab.com/licenses)
+* requirements:	Under basic restrictions, use worldwide, on all types of media, commercially or not, and in all types of derivative works

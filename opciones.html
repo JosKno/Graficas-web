@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chrono-Dash: Infinity Run - Opciones</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Trebuchet MS', sans-serif;
+      background: url('https://img2.rtve.es/n/2222180') no-repeat center center fixed;
+      background-size: cover;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .opciones {
+      background: rgba(0, 0, 0, 0.7);
+      padding: 30px;
+      border-radius: 20px;
+      text-align: center;
+      color: white;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
+    }
+
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 20px;
+      color: gold;
+      text-shadow: 2px 2px 5px black;
+    }
+
+    button {
+      display: block;
+      width: 220px;
+      margin: 10px auto;
+      padding: 15px;
+      font-size: 1.2em;
+      border: none;
+      border-radius: 10px;
+      background: goldenrod;
+      color: white;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: darkorange;
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <div class="opciones">
+    <h1>⚙ Opciones</h1>
+    <button>🎵 Sonido: Activado</button>
+    <button>🎮 Controles</button>
+    <button>📈 Dificultad</button>
+    <button onclick="window.location.href='menuprincipal.html'">🔙 Volver al Menú Principal</button>
+  </div>
+</body>
+</html>

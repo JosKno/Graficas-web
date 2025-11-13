@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chrono-Dash: Bosque Místico</title>
+  <link rel="stylesheet" href="stylesn1.css">
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
+  <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.173.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.173.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+
+<body>
+  <div class="game-screen">
+    <!-- HUD -->
+    <div class="hud-container">
+      <div class="hud-left">
+        <div class="hud-item">
+          <span class="hud-text">NIVEL 1 - BOSQUE</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-text">PUNTUACIÓN: </span><span id="score" class="hud-value">0</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-text">FRAGMENTOS: </span><span id="fragments" class="hud-value">0</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-text">EFECTOS: </span><span id="effects" class="hud-value"></span>
+        </div>
+      </div>
+      <div class="hud-right">
+        <button id="pause-button" class="pause-button">
+          <span class="pause-icon">||</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Contenedor del renderizador de Three.js -->
+    <div id="game-container-renderer" class="game-container"></div>
+  </div>
+
+  <!-- Menú de pausa -->
+  <div id="pause-menu" class="pause-menu-overlay" style="display: none;">
+    <div class="pause-box">
+      <h3 class="pause-title">PAUSA - NIVEL 1</h3>
+      <div class="pause-buttons-container">
+        <button id="resume-button" class="pause-button-action">REANUDAR</button>
+        <a href="index.html" class="pause-button-action">SALIR</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Script principal del juego - ORDEN CORRECTO -->
+  <script type="module">
+    // IMPORTANTE: Primero configurar el nivel, ANTES de importar main.js
+    import { setCurrentLevel } from './config.js';
+    
+    // Configurar NIVEL 1
+    setCurrentLevel(1);
+    console.log('Nivel 1 configurado - Bosque Místico');
+    
+    // Ahora sí, importar e iniciar el juego
+    await import('./main.js');
+  </script>
+
+  <script>
+    document.body.classList.add('fade-in');
+  </script>
+</body>
+</html>
