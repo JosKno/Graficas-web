@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Sistema de Autenticación</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a2e;
+            color: #00e0b3;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 { color: #00e0b3; text-align: center; }
+        .test-section {
+            background: rgba(0, 224, 179, 0.1);
+            border: 2px solid #00e0b3;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success { background: rgba(0, 255, 0, 0.2); border-left: 4px solid #00ff00; }
+        .error { background: rgba(255, 0, 0, 0.2); border-left: 4px solid #ff0000; }
+        .warning { background: rgba(255, 165, 0, 0.2); border-left: 4px solid #ffa500; }
+        button {
+            background: #00e0b3;
+            color: #1a1a2e;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover { background: #00ffc8; }
+        pre {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .link { color: #00e0b3; text-decoration: none; }
+        .link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <h1>🧪 TEST DE SISTEMA - CHRONO-DASH</h1>
+
+    <!-- Test 1: LocalStorage -->
+    <div class="test-section">
+        <h2>📦 Test 1: LocalStorage</h2>
+        <div id="test-localStorage"></div>
+        <button onclick="testLocalStorage()">Ejecutar Test</button>
+        <button onclick="clearLocalStorage()">Limpiar LocalStorage</button>
+    </div>
+
+    <!-- Test 2: API PHP -->
+    <div class="test-section">
+        <h2>🌐 Test 2: API PHP (Puntuaciones)</h2>
+        <div id="test-api"></div>
+        <button onclick="testAPI()">Ejecutar Test</button>
+    </div>
+
+    <!-- Test 3: Datos Actuales -->
+    <div class="test-section">
+        <h2>👤 Test 3: Usuario Actual</h2>
+        <div id="test-user"></div>
+        <button onclick="showUserData()">Mostrar Datos</button>
+    </div>
+
+    <!-- Test 4: Simular Guardado -->
+    <div class="test-section">
+        <h2>💾 Test 4: Simular Guardado de Puntuación</h2>
+        <div id="test-save"></div>
+        <button onclick="simulateSave()">Simular Guardado</button>
+    </div>
+
+    <!-- Links Rápidos -->
+    <div class="test-section">
+        <h2>🔗 Links Rápidos</h2>
+        <a href="login.html" class="link">🔐 Login</a> |
+        <a href="nivel.html" class="link">🎮 Selección de Nivel</a> |
+        <a href="puntuacion.html" class="link">🏆 Puntuaciones</a> |
+        <a href="index.html" class="link">🏠 Inicio</a>
+    </div>
+
+    <script>
+        // Test 1: LocalStorage
+        function testLocalStorage() {
+            const results = document.getElementById('test-localStorage');
+            results.innerHTML = '<div class="status">Ejecutando test...</div>';
+            
+            try {
+                // Intentar guardar
+                localStorage.setItem('test_key', 'test_value');
+                const value = localStorage.getItem('test_key');
+                
+                if (value === 'test_value') {
+                    results.innerHTML = `
+                        <div class="status success">
+                            ✅ LocalStorage funciona correctamente
+                        </div>
+                        <pre>${JSON.stringify({
+                            firebaseUid: localStorage.getItem('firebaseUid'),
+                            playerName: localStorage.getItem('playerName'),
+                            userEmail: localStorage.getItem('userEmail'),
+                            isGuest: localStorage.getItem('isGuest')
+                        }, null, 2)}</pre>
+                    `;
+                }
+                
+                localStorage.removeItem('test_key');
+            } catch (e) {
+                results.innerHTML = `<div class="status error">❌ Error: ${e.message}</div>`;
+            }
+        }
+
+        function clearLocalStorage() {
+            localStorage.removeItem('firebaseUid');
+            localStorage.removeItem('playerName');
+            localStorage.removeItem('userEmail');
+            localStorage.removeItem('isGuest');
+            alert('LocalStorage limpiado');
+            testLocalStorage();
+        }
+
+        // Test 2: API PHP
+        async function testAPI() {
+            const results = document.getElementById('test-api');
+            results.innerHTML = '<div class="status">Probando conexión con API...</div>';
+            
+            try {
+                // Test endpoint de top puntuaciones
+                const response = await fetch('api/puntuaciones.php?action=all_top');
+                const data = await response.json();
+                
+                if (data.success) {
+                    results.innerHTML = `
+                        <div class="status success">
+                            ✅ API PHP funcionando correctamente
+                        </div>
+                        <pre>${JSON.stringify(data, null, 2).substring(0, 500)}...</pre>
+                    `;
+                } else {
+                    results.innerHTML = `
+                        <div class="status error">
+                            ❌ API respondió con error: ${data.message}
+                        </div>
+                    `;
+                }
+            } catch (e) {
+                results.innerHTML = `
+                    <div class="status error">
+                        ❌ Error de conexión con API: ${e.message}
+                        <br><br>
+                        Verifica que:
+                        <ul>
+                            <li>El servidor PHP esté activo</li>
+                            <li>La URL de la API sea correcta</li>
+                            <li>La base de datos esté configurada</li>
+                        </ul>
+                    </div>
+                `;
+            }
+        }
+
+        // Test 3: Usuario Actual
+        function showUserData() {
+            const results = document.getElementById('test-user');
+            
+            const userData = {
+                firebaseUid: localStorage.getItem('firebaseUid') || 'No configurado',
+                playerName: localStorage.getItem('playerName') || 'No configurado',
+                userEmail: localStorage.getItem('userEmail') || 'No configurado',
+                isGuest: localStorage.getItem('isGuest') || 'No configurado'
+            };
+            
+            const isLoggedIn = userData.firebaseUid && userData.firebaseUid !== 'null';
+            
+            results.innerHTML = `
+                <div class="status ${isLoggedIn ? 'success' : 'warning'}">
+                    ${isLoggedIn ? '✅ Usuario autenticado' : '⚠️ No hay usuario autenticado'}
+                </div>
+                <pre>${JSON.stringify(userData, null, 2)}</pre>
+                ${!isLoggedIn ? '<p>👉 <a href="login.html" class="link">Inicia sesión aquí</a></p>' : ''}
+            `;
+        }
+
+        // Test 4: Simular Guardado
+        async function simulateSave() {
+            const results = document.getElementById('test-save');
+            results.innerHTML = '<div class="status">Simulando guardado...</div>';
+            
+            try {
+                const nivel = 1;
+                const puntuacion = Math.floor(Math.random() * 10000);
+                const fragmentos = Math.floor(puntuacion / 100);
+                const nombreJugador = localStorage.getItem('playerName') || 'TEST_USER';
+                const firebaseUid = localStorage.getItem('firebaseUid') || null;
+                
+                const response = await fetch('api/puntuaciones.php?action=save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        nivel: nivel,
+                        puntuacion: puntuacion,
+                        fragmentos: fragmentos,
+                        nombre_jugador: nombreJugador,
+                        firebase_uid: firebaseUid
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    results.innerHTML = `
+                        <div class="status success">
+                            ✅ Puntuación guardada exitosamente
+                        </div>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                        <p>Verifica en: <a href="puntuacion.html" class="link">Tabla de Puntuaciones</a></p>
+                    `;
+                } else {
+                    results.innerHTML = `
+                        <div class="status error">
+                            ❌ Error al guardar: ${data.message}
+                        </div>
+                    `;
+                }
+            } catch (e) {
+                results.innerHTML = `
+                    <div class="status error">
+                        ❌ Error: ${e.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Auto-ejecutar tests al cargar
+        window.onload = function() {
+            testLocalStorage();
+            showUserData();
+        };
+    </script>
+</body>
+</html>

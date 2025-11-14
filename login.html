@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chrono-Dash: Iniciar Sesión</title>
+    <link rel="stylesheet" href="stylesj.css">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
+    <style>
+        .login-container {
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 3px solid #00e0b3;
+            border-radius: 15px;
+            padding: 50px 60px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(0, 224, 179, 0.3);
+            max-width: 450px;
+            width: 100%;
+        }
+
+        .login-title {
+            font-size: 2.5rem;
+            color: #00e0b3;
+            text-shadow: 0 0 15px #00e0b3;
+            margin-bottom: 15px;
+            letter-spacing: 4px;
+        }
+
+        .login-subtitle {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 40px;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 1rem;
+            color: #fff;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(0, 224, 179, 0.3);
+            border-radius: 5px;
+            color: #fff;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #00e0b3;
+            box-shadow: 0 0 10px rgba(0, 224, 179, 0.4);
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 15px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background-color: #00e0b3;
+            border: none;
+            border-radius: 5px;
+            color: #0d1223;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .login-button:hover {
+            background-color: #00ffc8;
+            box-shadow: 0 0 20px rgba(0, 224, 179, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .login-button:disabled {
+            background-color: rgba(0, 224, 179, 0.3);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 30px 0;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .divider span {
+            padding: 0 10px;
+        }
+
+        .google-button {
+            width: 100%;
+            padding: 15px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            background-color: #fff;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            color: #0d1223;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .google-button:hover {
+            background-color: #f0f0f0;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+        }
+
+        .google-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        .toggle-mode {
+            margin-top: 20px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .toggle-mode a {
+            color: #00e0b3;
+            text-decoration: none;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-mode a:hover {
+            text-shadow: 0 0 10px #00e0b3;
+        }
+
+        .error-message {
+            background-color: rgba(255, 71, 87, 0.2);
+            border: 2px solid #ff4757;
+            color: #fff;
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .success-message {
+            background-color: rgba(0, 224, 179, 0.2);
+            border: 2px solid #00e0b3;
+            color: #fff;
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .guest-button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem;
+            background: none;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .guest-button:hover {
+            border-color: #00e0b3;
+            color: #00e0b3;
+            box-shadow: 0 0 10px rgba(0, 224, 179, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="login-container">
+            <h1 class="login-title">INICIAR SESIÓN</h1>
+            <p class="login-subtitle">Accede para guardar tu progreso</p>
+
+            <!-- Mensajes -->
+            <div id="error-message" class="error-message"></div>
+            <div id="success-message" class="success-message"></div>
+
+            <!-- Formulario de login -->
+            <form id="login-form">
+                <div class="input-group">
+                    <label for="email">EMAIL</label>
+                    <input type="email" id="email" placeholder="tu@email.com" required>
+                </div>
+                <div class="input-group">
+                    <label for="password">CONTRASEÑA</label>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="login-button" id="login-button">
+                    INICIAR SESIÓN
+                </button>
+            </form>
+
+            <!-- Botón de Google -->
+            <div class="divider"><span>O</span></div>
+            <button class="google-button" id="google-button">
+                <svg class="google-icon" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                CONTINUAR CON GOOGLE
+            </button>
+
+            <!-- Botón de invitado -->
+            <button class="guest-button" id="guest-button">
+                Continuar como invitado
+            </button>
+
+            <!-- Toggle entre login y registro -->
+            <div class="toggle-mode">
+                ¿No tienes cuenta? <a href="#" id="toggle-register">Regístrate aquí</a>
+            </div>
+
+            <a href="jugadores.html" class="back-button" style="display: block; margin-top: 30px;">REGRESAR</a>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { 
+            getAuth, 
+            signInWithEmailAndPassword, 
+            createUserWithEmailAndPassword,
+            signInWithPopup,
+            GoogleAuthProvider,
+            onAuthStateChanged 
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        // TODO: Reemplaza con tu configuración de Firebase
+        // Ve a: https://console.firebase.google.com/
+        const firebaseConfig = {
+            apiKey: "AIzaSyDEz_ksRtjc1jz-8UPY9zX1K1PxjBGWex8",
+            authDomain: "chrono-dash-b249a.firebaseapp.com",
+            projectId: "chrono-dash-b249a",
+            storageBucket: "chrono-dash-b249a.firebasestorage.app",
+            messagingSenderId: "69705398644",
+            appId: "1:69705398644:web:8a7d5563f5b11f54395421",
+            measurementId: "G-1ZFS84X0NL"
+            };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const googleProvider = new GoogleAuthProvider();
+
+        // Elementos del DOM
+        const loginForm = document.getElementById('login-form');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const loginButton = document.getElementById('login-button');
+        const googleButton = document.getElementById('google-button');
+        const guestButton = document.getElementById('guest-button');
+        const toggleRegister = document.getElementById('toggle-register');
+        const errorMessage = document.getElementById('error-message');
+        const successMessage = document.getElementById('success-message');
+
+        let isRegisterMode = false;
+
+        // Función para mostrar mensajes
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            successMessage.style.display = 'none';
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            successMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+        }
+
+        // Guardar información del usuario
+        function saveUserData(user, displayName = null) {
+            localStorage.setItem('firebaseUid', user.uid);
+            localStorage.setItem('userEmail', user.email);
+            localStorage.setItem('playerName', displayName || user.email.split('@')[0].toUpperCase());
+            localStorage.setItem('isGuest', 'false');
+        }
+
+        // Toggle entre login y registro
+        toggleRegister.addEventListener('click', (e) => {
+            e.preventDefault();
+            isRegisterMode = !isRegisterMode;
+            
+            if (isRegisterMode) {
+                document.querySelector('.login-title').textContent = 'REGISTRARSE';
+                document.querySelector('.login-subtitle').textContent = 'Crea tu cuenta para jugar';
+                loginButton.textContent = 'CREAR CUENTA';
+                toggleRegister.textContent = 'Iniciar sesión';
+                document.querySelector('.toggle-mode').innerHTML = '¿Ya tienes cuenta? <a href="#" id="toggle-register">Iniciar sesión</a>';
+            } else {
+                document.querySelector('.login-title').textContent = 'INICIAR SESIÓN';
+                document.querySelector('.login-subtitle').textContent = 'Accede para guardar tu progreso';
+                loginButton.textContent = 'INICIAR SESIÓN';
+                toggleRegister.textContent = 'Regístrate aquí';
+                document.querySelector('.toggle-mode').innerHTML = '¿No tienes cuenta? <a href="#" id="toggle-register">Regístrate aquí</a>';
+            }
+            
+            // Volver a agregar el event listener al nuevo elemento
+            document.getElementById('toggle-register').addEventListener('click', arguments.callee);
+        });
+
+        // Login/Registro con email y contraseña
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            loginButton.disabled = true;
+            loginButton.textContent = 'PROCESANDO...';
+
+            try {
+                let userCredential;
+                
+                if (isRegisterMode) {
+                    // Registrar nuevo usuario
+                    userCredential = await createUserWithEmailAndPassword(
+                        auth, 
+                        emailInput.value, 
+                        passwordInput.value
+                    );
+                    showSuccess('¡Cuenta creada exitosamente! Redirigiendo...');
+                } else {
+                    // Iniciar sesión
+                    userCredential = await signInWithEmailAndPassword(
+                        auth, 
+                        emailInput.value, 
+                        passwordInput.value
+                    );
+                    showSuccess('¡Sesión iniciada! Redirigiendo...');
+                }
+
+                const user = userCredential.user;
+                saveUserData(user);
+
+                // Redirigir después de 1 segundo
+                setTimeout(() => {
+                    window.location.href = 'nivel.html';
+                }, 1000);
+
+            } catch (error) {
+                console.error('Error de autenticación:', error);
+                
+                let errorMsg = 'Error al iniciar sesión';
+                
+                switch (error.code) {
+                    case 'auth/invalid-email':
+                        errorMsg = 'Email inválido';
+                        break;
+                    case 'auth/user-disabled':
+                        errorMsg = 'Usuario deshabilitado';
+                        break;
+                    case 'auth/user-not-found':
+                        errorMsg = 'Usuario no encontrado';
+                        break;
+                    case 'auth/wrong-password':
+                        errorMsg = 'Contraseña incorrecta';
+                        break;
+                    case 'auth/email-already-in-use':
+                        errorMsg = 'El email ya está registrado';
+                        break;
+                    case 'auth/weak-password':
+                        errorMsg = 'La contraseña debe tener al menos 6 caracteres';
+                        break;
+                    default:
+                        errorMsg = error.message;
+                }
+                
+                showError(errorMsg);
+                
+            } finally {
+                loginButton.disabled = false;
+                loginButton.textContent = isRegisterMode ? 'CREAR CUENTA' : 'INICIAR SESIÓN';
+            }
+        });
+
+        // Login con Google
+        googleButton.addEventListener('click', async () => {
+            try {
+                const result = await signInWithPopup(auth, googleProvider);
+                const user = result.user;
+                
+                saveUserData(user, user.displayName);
+                showSuccess('¡Sesión iniciada con Google! Redirigiendo...');
+                
+                setTimeout(() => {
+                    window.location.href = 'nivel.html';
+                }, 1000);
+                
+            } catch (error) {
+                console.error('Error con Google Sign-In:', error);
+                showError('Error al iniciar sesión con Google: ' + error.message);
+            }
+        });
+
+        // Continuar como invitado
+        guestButton.addEventListener('click', () => {
+            localStorage.setItem('firebaseUid', null);
+            localStorage.setItem('playerName', 'INVITADO');
+            localStorage.setItem('isGuest', 'true');
+            window.location.href = 'nivel.html';
+        });
+
+        // Verificar si ya hay una sesión activa
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                console.log('Usuario ya autenticado:', user.email);
+                // Opcional: redirigir automáticamente
+                // window.location.href = 'nivel.html';
+            }
+        });
+
+        document.body.classList.add('fade-in');
+    </script>
+</body>
+</html>
