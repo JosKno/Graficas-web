@@ -292,5 +292,12 @@ export let MODEL_CONFIG = LEVEL_1_CONFIG;
 
 export function setCurrentLevel(level) {
   MODEL_CONFIG = getLevelConfig(level);
+  
+  // Guardar nivel en window para acceso global
+  window.CURRENT_LEVEL = level;
+  window.LEVEL_1_CONFIG = LEVEL_1_CONFIG;
+  window.LEVEL_2_CONFIG = LEVEL_2_CONFIG;
+  window.LEVEL_3_CONFIG = LEVEL_3_CONFIG;
+  
   return MODEL_CONFIG;
 }

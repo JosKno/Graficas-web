@@ -5,9 +5,53 @@
 import * as THREE from "three";
 import gameState from './gameState.js';
 
+// Función para guardar puntuación automáticamente
+async function guardarPuntuacionAutomatica() {
+  try {
+    // Obtener nivel actual desde window
+    const nivel = window.CURRENT_LEVEL || 1;
+    
+    // Obtener nombre del jugador (por ahora "INVITADO", luego será de Firebase)
+    const nombreJugador = localStorage.getItem('playerName') || 'INVITADO';
+    const firebaseUid = localStorage.getItem('firebaseUid') || null;
+    
+    // Llamar a la API
+    const API_URL = 'http://localhost/Pantallas/api/puntuaciones.php';
+    const response = await fetch(`${API_URL}?action=save`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        nivel: nivel,
+        puntuacion: gameState.score,
+        fragmentos: gameState.fragments,
+        nombre_jugador: nombreJugador,
+        firebase_uid: firebaseUid
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      console.log('✅ Puntuación guardada:', data);
+      if (data.es_top_5) {
+        console.log(`🏆 ¡Nuevo récord! Posición: ${data.posicion}`);
+      }
+    } else {
+      console.error('❌ Error al guardar:', data.message);
+    }
+  } catch (error) {
+    console.error('❌ Error al guardar puntuación:', error);
+  }
+}
+
 export function showGameOver(reason = 'Colisión') {
   gameState.isGameOver = true;
   gameState.isPaused = true;
+
+  // Guardar puntuación automáticamente
+  guardarPuntuacionAutomatica();
 
   // Crear overlay de game over
   const gameOverOverlay = document.createElement('div');

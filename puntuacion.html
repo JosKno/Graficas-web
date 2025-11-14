@@ -6,19 +6,113 @@
     <title>Chrono-Dash: Puntuaciones</title>
     <link rel="stylesheet" href="stylesg.css">
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
+    <style>
+        .levels-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .tab-button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: #fff;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            padding: 12px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .tab-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .tab-button.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .scores-container {
+            display: none;
+        }
+        
+        .scores-container.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .loading {
+            text-align: center;
+            color: #fff;
+            font-size: 20px;
+            padding: 40px;
+        }
+        
+        .error-message {
+            background: rgba(255, 71, 87, 0.2);
+            border: 2px solid #ff4757;
+            color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .level-title {
+            font-size: 24px;
+            color: #fff;
+            text-align: center;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+    </style>
 </head>
 <body>
 
     <div class="main-container">
         <h2 class="screen-title">PUNTUACIONES</h2>
-        <ul class="scores-list">
-            <li><span class="score-rank">1.</span> <span class="score-name">JOSÉ ALBERTO</span> <span class="score-value" data-score="12450">12450</span></li>
-            <li><span class="score-rank">2.</span> <span class="score-name">DIEGO</span> <span class="score-value" data-score="9875">9875</span></li>
-            <li><span class="score-rank">3.</span> <span class="score-name">JOSUE</span> <span class="score-value" data-score="8500">8500</span></li>
-            <li><span class="score-rank">4.</span> <span class="score-name">JUGADOR 4</span> <span class="score-value" data-score="7250">7250</span></li>
-            <li><span class="score-rank">5.</span> <span class="score-name">JUGADOR 5</span> <span class="score-value" data-score="6100">6100</span></li>
-        </ul>
         
+        <!-- Tabs para cambiar de nivel -->
+        <div class="levels-tabs">
+            <button class="tab-button active" data-nivel="1">🌲 NIVEL 1</button>
+            <button class="tab-button" data-nivel="2">🏙️ NIVEL 2</button>
+            <button class="tab-button" data-nivel="3">🌋 NIVEL 3</button>
+        </div>
+        
+        <!-- Contenedor de carga -->
+        <div id="loading" class="loading">Cargando puntuaciones...</div>
+        
+        <!-- Contenedor de error -->
+        <div id="error" class="error-message" style="display: none;"></div>
+        
+        <!-- Contenedores de puntuaciones por nivel -->
+        <div id="nivel-1" class="scores-container active">
+            <h3 class="level-title">🌲 Bosque Místico</h3>
+            <ul class="scores-list" id="scores-nivel-1"></ul>
+        </div>
+        
+        <div id="nivel-2" class="scores-container">
+            <h3 class="level-title">🏙️ Ciudad Neón</h3>
+            <ul class="scores-list" id="scores-nivel-2"></ul>
+        </div>
+        
+        <div id="nivel-3" class="scores-container">
+            <h3 class="level-title">🌋 Volcán Infernal</h3>
+            <ul class="scores-list" id="scores-nivel-3"></ul>
+        </div>
+        
+        <!-- Integración Social -->
         <div class="social-integration">
             <p class="social-text">¡Comparte tu mejor puntuación en X!</p>
             <button id="share-score-button" class="social-button">
@@ -34,11 +128,82 @@
                 </div>
             </div>
         </div>
+        
         <a href="index.html" class="back-button">REGRESAR</a>
     </div>
-<script src="social.js"></script>
-<script>
-    document.body.classList.add('fade-in');
-</script>
+
+    <script src="js/apiClient.js"></script>
+    <script src="social.js"></script>
+    <script>
+        document.body.classList.add('fade-in');
+        
+        // Cargar puntuaciones al iniciar
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const loading = document.getElementById('loading');
+                const error = document.getElementById('error');
+                
+                // Obtener todas las puntuaciones
+                const puntuaciones = await PuntuacionesAPI.getAllTop();
+                
+                if (!puntuaciones) {
+                    throw new Error('No se pudieron cargar las puntuaciones');
+                }
+                
+                // Ocultar loading
+                loading.style.display = 'none';
+                
+                // Renderizar puntuaciones de cada nivel
+                renderizarPuntuaciones(1, puntuaciones.nivel_1);
+                renderizarPuntuaciones(2, puntuaciones.nivel_2);
+                renderizarPuntuaciones(3, puntuaciones.nivel_3);
+                
+            } catch (err) {
+                console.error(err);
+                document.getElementById('loading').style.display = 'none';
+                const errorDiv = document.getElementById('error');
+                errorDiv.textContent = 'Error al cargar las puntuaciones. Por favor, verifica que el servidor esté activo.';
+                errorDiv.style.display = 'block';
+            }
+        });
+        
+        // Función para renderizar puntuaciones
+        function renderizarPuntuaciones(nivel, puntuaciones) {
+            const lista = document.getElementById(`scores-nivel-${nivel}`);
+            lista.innerHTML = '';
+            
+            if (!puntuaciones || puntuaciones.length === 0) {
+                lista.innerHTML = '<li style="text-align: center; opacity: 0.6;">No hay puntuaciones registradas</li>';
+                return;
+            }
+            
+            puntuaciones.forEach((item, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span class="score-rank">${index + 1}.</span>
+                    <span class="score-name">${item.nombre_jugador}</span>
+                    <span class="score-value" data-score="${item.puntuacion}">${item.puntuacion}</span>
+                `;
+                lista.appendChild(li);
+            });
+        }
+        
+        // Manejo de tabs
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const nivel = button.dataset.nivel;
+                
+                // Actualizar botones activos
+                document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                
+                // Mostrar contenedor correspondiente
+                document.querySelectorAll('.scores-container').forEach(container => {
+                    container.classList.remove('active');
+                });
+                document.getElementById(`nivel-${nivel}`).classList.add('active');
+            });
+        });
+    </script>
 </body>
 </html>
