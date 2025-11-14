@@ -48,7 +48,7 @@ export const LEVEL_1_CONFIG = {
   },
   bomb: {
     path: "./modelos/bomb/scene.gltf",
-    scale: { x: 6.5, y: 6.5, z: 6.5 },
+    scale: { x: 7.5, y: 7.5, z: 7.5 },
     yOffset: 1,
     emissiveColor: 0xff0000,
     emissiveIntensity: 2.0
@@ -124,10 +124,10 @@ export const LEVEL_2_CONFIG = {
   },
   bomb: {
     path: "./modelos/bomb/scene.gltf",
-   scale: { x: 1.6, y: 1.6, z: 1.6 },
+    scale: { x: 7.5, y: 7.5, z: 7.5 },
     yOffset: 1,
-    emissiveColor: 0xff4500,
-    emissiveIntensity: 2.5
+    emissiveColor: 0xff0000,
+    emissiveIntensity: 2.0
   },
   background: "./img/fondociu.jpg",
   terrain: {
@@ -199,8 +199,8 @@ export const LEVEL_3_CONFIG = {
     yOffset: 0
   },
   bomb: {
-    path: "./modelos/bomb/scene.gltf",
-    scale: { x: 6.5, y: 6.5, z: 6.5 },
+   path: "./modelos/bomb/scene.gltf",
+    scale: { x: 7.5, y: 7.5, z: 7.5 },
     yOffset: 1,
     emissiveColor: 0xff0000,
     emissiveIntensity: 2.0

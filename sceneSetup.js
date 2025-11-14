@@ -282,7 +282,12 @@ export function loadRunner(onComplete) {
         
         // Buscar animación de saltar
         const jumpAnimation = model.animations.find(anim => 
-          anim.name.toLowerCase().includes('jump') 
+          anim.name.toLowerCase().includes('jump')
+        );
+        
+        // Buscar animación de caída/muerte
+        const fallAnimation = model.animations.find(anim => 
+          anim.name.toLowerCase().includes('roll')
         );
         
         if (runAnimation) {
@@ -300,6 +305,15 @@ export function loadRunner(onComplete) {
           gameState.animations.jump.setLoop(THREE.LoopOnce);
           gameState.animations.jump.clampWhenFinished = true;
           console.log('Animación de saltar encontrada:', jumpAnimation.name);
+        }
+        
+        if (fallAnimation) {
+          gameState.animations.fall = gameState.mixer.clipAction(fallAnimation);
+          gameState.animations.fall.setLoop(THREE.LoopOnce);
+          gameState.animations.fall.clampWhenFinished = true;
+          console.log('Animación de caída encontrada:', fallAnimation.name);
+        } else {
+          console.warn('No se encontró animación de caída/muerte');
         }
         
         console.log('Animaciones disponibles:', model.animations.map(a => a.name));

@@ -2,6 +2,7 @@
 // ESTADO DEL JUEGO
 // ============================================
 
+import * as THREE from "three";
 import { GAME_CONFIG } from './config.js';
 
 class GameState {
@@ -23,6 +24,7 @@ class GameState {
     this.animations = {
       run: null,
       jump: null,
+      fall: null,
       current: null
     };
     
@@ -67,6 +69,35 @@ class GameState {
     this.levelConfig = config;
     this.gameSpeed = config.gameSpeed;
     console.log('Configuración de nivel cargada:', config.name);
+  }
+  
+  playDeathAnimation(callback) {
+    if (!this.mixer || !this.animations.fall) {
+      console.log('No hay animación de caída, ejecutando callback inmediatamente');
+      if (callback) callback();
+      return;
+    }
+    
+    // Detener animación actual
+    if (this.animations.current) {
+      this.animations.current.stop();
+    }
+    
+    // Reproducir animación de caída una sola vez
+    this.animations.fall.reset();
+    this.animations.fall.setLoop(THREE.LoopOnce);
+    this.animations.fall.clampWhenFinished = true;
+    this.animations.fall.play();
+    this.animations.current = this.animations.fall;
+    
+    console.log('Reproduciendo animación de muerte');
+    
+    // Esperar a que termine la animación
+    const duration = this.animations.fall.getClip().duration;
+    setTimeout(() => {
+      console.log('Animación de muerte completada');
+      if (callback) callback();
+    }, duration * 1000); // Convertir a milisegundos
   }
   
   updateScore(points) {

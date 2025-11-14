@@ -133,7 +133,7 @@ export function showGameOver(reason = 'Colisión') {
 }
 
 export function createExplosion(position, color = 0xff4500) {
-  // Esta función crea partículas de explosión
+  // Explosión estándar (bomba y obstáculos)
   const particlesGeometry = new THREE.BufferGeometry();
   const particlesCount = 50;
   const positions = new Float32Array(particlesCount * 3);
@@ -144,7 +144,6 @@ export function createExplosion(position, color = 0xff4500) {
     positions[i * 3 + 1] = position.y;
     positions[i * 3 + 2] = position.z;
 
-    // Velocidades aleatorias para cada partícula
     velocities.push({
       x: (Math.random() - 0.5) * 0.3,
       y: Math.random() * 0.3,
@@ -164,7 +163,84 @@ export function createExplosion(position, color = 0xff4500) {
 
   const particles = new THREE.Points(particlesGeometry, particlesMaterial);
   
-  return { particles, velocities, life: 1.0 };
+  return { particles, velocities, life: 1.0, type: 'explosion' };
+}
+
+export function createSparks(position, color = 0x00ff00) {
+  // Chispas para PowerUp bueno
+  const particlesGeometry = new THREE.BufferGeometry();
+  const particlesCount = 30;
+  const positions = new Float32Array(particlesCount * 3);
+  const velocities = [];
+
+  for(let i = 0; i < particlesCount; i++) {
+    positions[i * 3] = position.x;
+    positions[i * 3 + 1] = position.y;
+    positions[i * 3 + 2] = position.z;
+
+    // Velocidades más rápidas y en todas direcciones (chispas)
+    velocities.push({
+      x: (Math.random() - 0.5) * 0.5,
+      y: Math.random() * 0.6 + 0.2,  // Más hacia arriba
+      z: (Math.random() - 0.5) * 0.5
+    });
+  }
+
+  particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+  const particlesMaterial = new THREE.PointsMaterial({
+    size: 0.15,  // Más pequeñas que explosión
+    color: color,
+    transparent: true,
+    opacity: 1,
+    blending: THREE.AdditiveBlending
+  });
+
+  const particles = new THREE.Points(particlesGeometry, particlesMaterial);
+  
+  return { particles, velocities, life: 0.8, type: 'sparks' };
+}
+
+export function createShatter(position, color = 0xff0000) {
+  // Partículas que se destruyen para PowerUp malo
+  const particlesGeometry = new THREE.BufferGeometry();
+  const particlesCount = 40;
+  const positions = new Float32Array(particlesCount * 3);
+  const velocities = [];
+  const sizes = new Float32Array(particlesCount);
+
+  for(let i = 0; i < particlesCount; i++) {
+    positions[i * 3] = position.x;
+    positions[i * 3 + 1] = position.y;
+    positions[i * 3 + 2] = position.z;
+
+    // Velocidades explosivas hacia afuera
+    const angle = (i / particlesCount) * Math.PI * 2;
+    const speed = Math.random() * 0.4 + 0.2;
+    velocities.push({
+      x: Math.cos(angle) * speed,
+      y: Math.random() * 0.3 + 0.1,
+      z: Math.sin(angle) * speed
+    });
+
+    // Tamaños variables para efecto de fragmentos
+    sizes[i] = Math.random() * 0.3 + 0.2;
+  }
+
+  particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  particlesGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+  const particlesMaterial = new THREE.PointsMaterial({
+    size: 0.25,
+    color: color,
+    transparent: true,
+    opacity: 1,
+    sizeAttenuation: true
+  });
+
+  const particles = new THREE.Points(particlesGeometry, particlesMaterial);
+  
+  return { particles, velocities, life: 1.2, type: 'shatter' };
 }
 
 export function updateExplosions(explosions, scene, delta) {
@@ -178,13 +254,19 @@ export function updateExplosions(explosions, scene, delta) {
       positions[j * 3 + 1] += explosion.velocities[j].y;
       positions[j * 3 + 2] += explosion.velocities[j].z;
 
-      // Gravedad
-      explosion.velocities[j].y -= delta * 2;
+      // Gravedad diferente según tipo
+      if (explosion.type === 'sparks') {
+        explosion.velocities[j].y -= delta * 3;  // Caen más rápido (chispas)
+      } else if (explosion.type === 'shatter') {
+        explosion.velocities[j].y -= delta * 2.5;  // Gravedad media (fragmentos)
+      } else {
+        explosion.velocities[j].y -= delta * 2;  // Gravedad normal (explosión)
+      }
     }
 
     explosion.particles.geometry.attributes.position.needsUpdate = true;
     explosion.life -= delta;
-    explosion.particles.material.opacity = explosion.life;
+    explosion.particles.material.opacity = explosion.life / (explosion.type === 'shatter' ? 1.2 : explosion.type === 'sparks' ? 0.8 : 1.0);
 
     // Remover si terminó
     if (explosion.life <= 0) {

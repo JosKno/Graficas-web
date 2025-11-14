@@ -5,7 +5,7 @@
 import * as THREE from "three";
 import { GAME_CONFIG } from './config.js';
 import gameState from './gameState.js';
-import { showGameOver, createExplosion, updateExplosions } from './gameOver.js';
+import { showGameOver, createExplosion, createSparks, createShatter, updateExplosions } from './gameOver.js';
 
 export function updateRunner(delta) {
   if (!gameState.runner) return;
@@ -62,7 +62,12 @@ export function updateObstacles() {
       if (gameState.runner && !gameState.isJumping && !gameState.isGameOver) {
         if (checkCollision(obj.mesh.position, gameState.runner.position, 2)) {
           console.log('¡Colisión con obstáculo!');
-          showGameOver('Chocaste con un obstáculo');
+          gameState.isGameOver = true;
+          
+          // Reproducir animación de muerte y luego mostrar game over
+          gameState.playDeathAnimation(() => {
+            showGameOver('Chocaste con un obstáculo');
+          });
         }
       }
 
@@ -113,10 +118,10 @@ export function updatePowerupsGood() {
     }
 
     if (gameState.runner && !gameState.isGameOver && checkCollision(powerup.mesh.position, gameState.runner.position)) {
-      // Crear partículas verdes
-      const explosion = createExplosion(powerup.mesh.position, 0x00ff00);
-      gameState.scene.add(explosion.particles);
-      gameState.explosions.push(explosion);
+      // Crear CHISPAS verdes
+      const sparks = createSparks(powerup.mesh.position, 0x00ff00);
+      gameState.scene.add(sparks.particles);
+      gameState.explosions.push(sparks);
       
       gameState.scene.remove(powerup.mesh);
       gameState.powerupsGood.splice(i, 1);
@@ -146,10 +151,10 @@ export function updatePowerupsBad() {
     }
 
     if (gameState.runner && !gameState.isGameOver && checkCollision(powerup.mesh.position, gameState.runner.position)) {
-      // Crear partículas rojas de daño
-      const explosion = createExplosion(powerup.mesh.position, 0xff0000);
-      gameState.scene.add(explosion.particles);
-      gameState.explosions.push(explosion);
+      // Crear FRAGMENTOS rojos (efecto de destrucción)
+      const shatter = createShatter(powerup.mesh.position, 0xff0000);
+      gameState.scene.add(shatter.particles);
+      gameState.explosions.push(shatter);
       
       gameState.scene.remove(powerup.mesh);
       gameState.powerupsBad.splice(i, 1);
@@ -181,13 +186,14 @@ export function updateBombs() {
       
       gameState.scene.remove(bomb.mesh);
       gameState.bombs.splice(i, 1);
+      gameState.isGameOver = true;
       
       console.log('¡Explosión de bomba!');
       
-      // Game over con delay para ver la explosión
-      setTimeout(() => {
+      // Reproducir animación de muerte y luego mostrar game over
+      gameState.playDeathAnimation(() => {
         showGameOver('¡Explotaste con una bomba!');
-      }, 300);
+      });
       
       continue;
     }
@@ -200,7 +206,13 @@ export function updateBombs() {
 }
 
 export function updateAll(delta) {
-  if (!gameState.isGameStarted || gameState.isGameOver) return;
+  if (!gameState.isGameStarted) return;
+  
+  // Actualizar explosiones/partículas SIEMPRE (incluso durante game over)
+  updateExplosions(gameState.explosions, gameState.scene, delta);
+  
+  // Si hay game over, solo actualizar partículas y animaciones, no el resto del juego
+  if (gameState.isGameOver) return;
   
   updateRunner(delta);
   updateGround();
@@ -210,9 +222,6 @@ export function updateAll(delta) {
   updatePowerupsGood();
   updatePowerupsBad();
   updateBombs();
-  
-  // Actualizar explosiones/partículas
-  updateExplosions(gameState.explosions, gameState.scene, delta);
 
   // Incrementar puntuación por distancia
   gameState.score += GAME_CONFIG.scores.distancePerFrame;
