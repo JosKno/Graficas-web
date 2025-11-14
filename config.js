@@ -29,8 +29,8 @@ export const LEVEL_1_CONFIG = {
     emissiveIntensity: 2.0
   },
   powerupBad: {
-    path: "./modelos/powerup_bad/scene.gltf",
-    scale: { x: 0.7, y: 0.7, z: 0.7 },
+    path: "./modelos/poison/scene.gltf",
+    scale: { x: 0.5, y: 0.5, z: 0.5 },
     yOffset: 1.5,
     float: true,
     emissiveColor: 0xff0000,
@@ -48,12 +48,12 @@ export const LEVEL_1_CONFIG = {
   },
   bomb: {
     path: "./modelos/bomb/scene.gltf",
-    scale: { x: 1.6, y: 1.6, z: 1.6 },
+    scale: { x: 6.5, y: 6.5, z: 6.5 },
     yOffset: 1,
     emissiveColor: 0xff0000,
     emissiveIntensity: 2.0
   },
-  background: "./imagenes/bosque_fondo.jpg",
+  background: "./img/cielo.png",
   terrain: {
     road: "#8B4513",    // Café tierra
     grass: "#228B22",   // Verde pasto
@@ -70,7 +70,7 @@ export const LEVEL_1_CONFIG = {
     coin: 0.025,
     powerupGood: 0.0015,
     powerupBad: 0.0005,
-    bomb: 0.0002          // MUY RARO - 0.02% de probabilidad
+    bomb: 0.0015          // MUY RARO - 0.02% de probabilidad
   }
 };
 
@@ -103,8 +103,8 @@ export const LEVEL_2_CONFIG = {
     emissiveIntensity: 2.0
   },
   powerupBad: {
-    path: "./modelos/powerup_bad/scene.gltf",
-    scale: { x: 0.7, y: 0.7, z: 0.7 },
+    path: "./modelos/poison/scene.gltf",
+    scale: { x: 0.5, y: 0.5, z: 0.5 },
     yOffset: 1.5,
     float: true,
     emissiveColor: 0xff0000,
@@ -129,7 +129,7 @@ export const LEVEL_2_CONFIG = {
     emissiveColor: 0xff4500,
     emissiveIntensity: 2.5
   },
-  background: "./imagenes/ciudad_fondo.jpg",
+  background: "./img/fondociu.jpg",
   terrain: {
     road: "#2C3E50",    // Asfalto oscuro
     grass: "#34495E",   // Acera gris oscura
@@ -150,7 +150,7 @@ export const LEVEL_2_CONFIG = {
     coin: 0.025,
     powerupGood: 0.001,
     powerupBad: 0.0010,    // 100% más power-ups malos
-    bomb: 0.0003          // Un poco más frecuente que nivel 1
+    bomb: 0.0010          // Un poco más frecuente que nivel 1
   }
 };
 
@@ -181,7 +181,7 @@ export const LEVEL_3_CONFIG = {
     emissiveIntensity: 2.0
   },
   powerupBad: {
-    path: "./modelos/poison/scene.gltf",
+   path: "./modelos/poison/scene.gltf",
     scale: { x: 0.5, y: 0.5, z: 0.5 },
     yOffset: 1.5,
     float: true,
@@ -200,12 +200,12 @@ export const LEVEL_3_CONFIG = {
   },
   bomb: {
     path: "./modelos/bomb/scene.gltf",
-    scale: { x: 1.6, y: 1.6, z: 1.6 },
+    scale: { x: 6.5, y: 6.5, z: 6.5 },
     yOffset: 1,
-    emissiveColor: 0xff6347,
-    emissiveIntensity: 3.0
+    emissiveColor: 0xff0000,
+    emissiveIntensity: 2.0
   },
-  background: "./imagenes/volcan_fondo.jpg",
+  background: "./img/fondovolo.jpg",
   terrain: {
     road: "#3D0000",    // Rojo oscuro lava solidificada
     grass: "#8B0000",   // Rojo sangre (lava lateral)
@@ -222,7 +222,7 @@ export const LEVEL_3_CONFIG = {
     coin: 0.025,
     powerupGood: 0.0008,
     powerupBad: 0.0015,    // 200% más power-ups malos
-    bomb: 0.0004          // Más frecuente (nivel difícil)
+    bomb: 0.001          // Más frecuente (nivel difícil)
   }
 };
 
