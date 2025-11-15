@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplayer - Chrono Dash</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Import Map para Three.js -->
+    <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.173.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.173.0/examples/jsm/"
+      }
+    }
+    </script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+        }
+
+        #game-container-renderer {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        /* HUD Multiplayer */
+        .multiplayer-hud {
+            position: fixed;
+            top: 20px;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 40px;
+            pointer-events: none;
+        }
+
+        .player-info {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            min-width: 250px;
+            border: 3px solid;
+        }
+
+        .player-info.local {
+            border-color: #00b3ff;
+        }
+
+        .player-info.remote {
+            border-color: #ff4757;
+        }
+
+        .player-name {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .player-info.local .player-name {
+            color: #00b3ff;
+        }
+
+        .player-info.remote .player-name {
+            color: #ff4757;
+        }
+
+        .player-stats {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.6;
+        }
+
+        .player-stats .label {
+            color: rgba(255, 255, 255, 0.6);
+            display: inline-block;
+            width: 100px;
+        }
+
+        .player-stats .value {
+            font-weight: 700;
+            color: #00e0b3;
+        }
+
+        .player-status {
+            margin-top: 10px;
+            padding: 8px 15px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .player-status.alive {
+            background: rgba(0, 255, 0, 0.2);
+            color: #00ff00;
+        }
+
+        .player-status.dead {
+            background: rgba(255, 0, 0, 0.2);
+            color: #ff0000;
+        }
+
+        /* Botón de pausa */
+        #pause-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 1001;
+            pointer-events: all;
+        }
+
+        #pause-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        /* Menú de pausa */
+        #pause-menu {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .pause-content {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px 60px;
+            text-align: center;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .pause-content h2 {
+            color: #00e0b3;
+            font-size: 48px;
+            margin-bottom: 30px;
+            text-shadow: 0 0 20px rgba(0, 224, 179, 0.8);
+        }
+
+        .pause-button {
+            display: block;
+            width: 100%;
+            margin: 15px 0;
+            padding: 15px 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .pause-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Countdown */
+        #countdown {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 120px;
+            font-weight: 700;
+            color: white;
+            z-index: 10000;
+            text-shadow: 0 0 30px rgba(0, 224, 179, 1);
+            animation: pulse 0.5s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.2); }
+        }
+
+        /* Game Over Multiplayer */
+        #gameover-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .gameover-content {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 50px;
+            text-align: center;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            max-width: 600px;
+        }
+
+        .gameover-content h1 {
+            font-size: 60px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+        }
+
+        .gameover-content.winner h1 {
+            color: #00ff00;
+        }
+
+        .gameover-content.loser h1 {
+            color: #ff4757;
+        }
+
+        .gameover-content.draw h1 {
+            color: #ffd700;
+        }
+
+        .final-scores {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+        }
+
+        .final-score-card {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+            min-width: 200px;
+        }
+
+        .final-score-card h3 {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .final-score-card.local h3 {
+            color: #00b3ff;
+        }
+
+        .final-score-card.remote h3 {
+            color: #ff4757;
+        }
+
+        .final-score-card p {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.8);
+            margin: 5px 0;
+        }
+
+        .gameover-buttons {
+            margin-top: 30px;
+        }
+
+        .gameover-button {
+            display: inline-block;
+            margin: 10px;
+            padding: 15px 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .gameover-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Contenedor del juego -->
+    <div id="game-container-renderer"></div>
+
+    <!-- HUD Multiplayer -->
+    <div class="multiplayer-hud">
+        <!-- Jugador Local -->
+        <div class="player-info local">
+            <div class="player-name" id="local-player-name">TÚ</div>
+            <div class="player-stats">
+                <div>
+                    <span class="label">Puntos:</span>
+                    <span class="value" id="local-score">0</span>
+                </div>
+                <div>
+                    <span class="label">Fragmentos:</span>
+                    <span class="value" id="local-fragments">0</span>
+                </div>
+            </div>
+            <div class="player-status alive" id="local-status">✓ VIVO</div>
+        </div>
+
+        <!-- Jugador Remoto -->
+        <div class="player-info remote">
+            <div class="player-name" id="remote-player-name">OPONENTE</div>
+            <div class="player-stats">
+                <div>
+                    <span class="label">Puntos:</span>
+                    <span class="value" id="remote-score">0</span>
+                </div>
+                <div>
+                    <span class="label">Fragmentos:</span>
+                    <span class="value" id="remote-fragments">0</span>
+                </div>
+            </div>
+            <div class="player-status alive" id="remote-status">✓ VIVO</div>
+        </div>
+    </div>
+
+    <!-- Botón de pausa -->
+    <button id="pause-button">⏸ PAUSA</button>
+
+    <!-- Menú de pausa -->
+    <div id="pause-menu">
+        <div class="pause-content">
+            <h2>PAUSA</h2>
+            <button class="pause-button" id="resume-button">CONTINUAR</button>
+            <a href="lobby.html" class="pause-button">SALIR AL LOBBY</a>
+        </div>
+    </div>
+
+    <!-- Countdown -->
+    <div id="countdown"></div>
+
+    <!-- Game Over Overlay -->
+    <div id="gameover-overlay">
+        <div class="gameover-content" id="gameover-content">
+            <h1 id="gameover-title">¡VICTORIA!</h1>
+            <p id="gameover-message" style="font-size: 24px; color: rgba(255, 255, 255, 0.8); margin-bottom: 20px;"></p>
+            
+            <div class="final-scores">
+                <div class="final-score-card local">
+                    <h3>TÚ</h3>
+                    <p>Puntos: <span id="final-local-score">0</span></p>
+                    <p>Fragmentos: <span id="final-local-fragments">0</span></p>
+                </div>
+                <div class="final-score-card remote">
+                    <h3>OPONENTE</h3>
+                    <p>Puntos: <span id="final-remote-score">0</span></p>
+                    <p>Fragmentos: <span id="final-remote-fragments">0</span></p>
+                </div>
+            </div>
+
+            <div class="gameover-buttons">
+                <a href="lobby.html" class="gameover-button">VOLVER AL LOBBY</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getDatabase } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDEz_ksRtjc1jz-8UPY9zX1K1PxjBGWex8",
+            authDomain: "chrono-dash-b249a.firebaseapp.com",
+            projectId: "chrono-dash-b249a",
+            storageBucket: "chrono-dash-b249a.firebasestorage.app",
+            messagingSenderId: "69705398644",
+            appId: "1:69705398644:web:8a7d5563f5b11f54395421",
+            measurementId: "G-1ZFS84X0NL"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const database = getDatabase(app);
+        
+        // Hacer database global
+        window.firebaseDB = database;
+        window.firebaseAuth = auth;
+
+        // Verificar autenticación
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                alert('Debes iniciar sesión');
+                window.location.href = 'login.html?mode=multiplayer';
+            } else {
+                console.log('✅ Usuario autenticado:', user.email);
+                window.currentUser = user;
+            }
+        });
+    </script>
+
+    <!-- Cargar el juego multiplayer -->
+    <script type="module" src="./js/mainMultiplayer.js"></script>
+</body>
+</html>

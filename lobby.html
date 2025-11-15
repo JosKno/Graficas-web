@@ -630,13 +630,19 @@
                 updatePlayersGrid(room.players);
 
                 // Verificar si ambos jugadores están listos
-                const players = Object.values(room.players);
-                if (players.length === 2 && players.every(p => p.ready)) {
-                    // Iniciar juego
-                    setTimeout(() => {
-                        window.location.href = `nivel_multiplayer.html?room=${roomId}`;
-                    }, 2000);
-                }
+const players = Object.values(room.players);
+if (players.length === 2 && players.every(p => p.ready)) {
+    // Iniciar juego con parámetros correctos
+    console.log('🎮 ¡Ambos jugadores listos! Iniciando partida...');
+    
+    // Actualizar estado de la sala a 'playing'
+    roomManager.startGame(roomId).then(() => {
+        // Redirigir al nivel multiplayer con roomId y level
+        setTimeout(() => {
+            window.location.href = `nivel_multiplayer.html?roomId=${roomId}&level=${room.level || 1}`;
+        }, 1500);
+    });
+}
 
                 // Si el otro jugador salió
                 if (players.length === 1 && Object.keys(room.players)[0] !== currentUser.uid) {
