@@ -26,9 +26,9 @@ export function loadRunnerMultiplayer(playerType, color, onComplete) {
         levelConfig.runner.scale.z
       );
       
-      // Posicionar según el tipo de jugador
-      // Jugador local empieza en carril izquierdo, remoto en carril derecho
-      const startLane = playerType === 'local' ? 0 : 2;
+      // Posicionar según el COLOR (no el tipo)
+      // Azul = carril izquierdo (0), Rojo = carril derecho (2)
+      const startLane = color === 'blue' ? 0 : 2;
       player.currentLane = startLane;
       player.targetLaneX = GAME_CONFIG.lanes[startLane];
       

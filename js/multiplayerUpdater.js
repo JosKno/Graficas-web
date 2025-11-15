@@ -7,6 +7,7 @@ import { GAME_CONFIG } from '../config.js';
 import mpGameState from './multiplayerGameState.js';
 import { getMultiplayerSync } from './multiplayerSync.js';
 import { createExplosion, createSparks, updateExplosions } from '../gameOver.js';
+import { handleGameOver } from './mainMultiplayer.js';
 
 const multiplayerSync = getMultiplayerSync();
 
@@ -112,8 +113,16 @@ function updateObstacles() {
         // Actualizar HUD
         updatePlayerStatusUI('local', false);
         
-        // Notificar a Firebase
+        // Notificar a Firebase que este jugador murió
         multiplayerSync.updateLocalAliveStatus(false);
+        
+        // Declarar al jugador remoto como ganador INMEDIATAMENTE
+        multiplayerSync.declareWinner(mpGameState.remotePlayerId);
+        
+        // Mostrar Game Over LOCALMENTE también
+        setTimeout(() => {
+          handleGameOver(mpGameState.remotePlayerId);
+        }, 500);
         
         // Remover obstáculo
         mpGameState.scene.remove(obj.mesh);
@@ -284,6 +293,14 @@ function updateBombs() {
         mpGameState.killPlayer('local');
         updatePlayerStatusUI('local', false);
         multiplayerSync.updateLocalAliveStatus(false);
+        
+        // Declarar ganador inmediatamente
+        multiplayerSync.declareWinner(mpGameState.remotePlayerId);
+        
+        // Mostrar Game Over LOCALMENTE también
+        setTimeout(() => {
+          handleGameOver(mpGameState.remotePlayerId);
+        }, 500);
         
         mpGameState.scene.remove(bomb.mesh);
         mpGameState.bombs.splice(i, 1);

@@ -16,6 +16,9 @@ const multiplayerSync = getMultiplayerSync();
 const loader = new GLTFLoader();
 const textureLoader = new THREE.TextureLoader();
 
+// Variable global para saber si el jugador local es el creador
+let isLocalCreator = false;
+
 // NOTA: NO importamos spawner.js porque usa gameState single player
 // En su lugar, crearemos los objetos directamente aquí
 
@@ -134,10 +137,19 @@ async function init() {
     remote: remotePlayerId
   });
 
-  // Obtener color del jugador
-  const playerColor = roomInfo.players[localPlayerId]?.color || 'blue';
+  // Obtener color del jugador basado en si es creador o no
+  const isCreator = roomInfo.createdBy === localPlayerId;
+  const playerColor = isCreator ? 'blue' : 'red';
   
-  console.log('🎨 Color asignado:', playerColor);
+  // Guardar globalmente para usar en actualización de HUD
+  isLocalCreator = isCreator;
+  
+  console.log('🎨 Color asignado:', {
+    isCreator,
+    color: playerColor,
+    createdBy: roomInfo.createdBy,
+    localPlayerId
+  });
 
   // Configurar estado del juego
   const levelConfig = getLevelConfig(level);
@@ -337,12 +349,25 @@ function updatePlayerNames(roomInfo, localPlayerId, remotePlayerId) {
   const localName = localPlayerData?.name || 'TÚ';
   const remoteName = remotePlayerData?.name || 'OPONENTE';
   
-  document.getElementById('local-player-name').textContent = localName.toUpperCase();
-  document.getElementById('remote-player-name').textContent = remoteName.toUpperCase();
+  // Determinar quién es el creador
+  const isLocalCreator = roomInfo.createdBy === localPlayerId;
   
-  console.log('📝 Nombres actualizados:', {
-    local: localName,
-    remote: remoteName
+  // HUD: Creador SIEMPRE a la izquierda (azul), quien se une SIEMPRE a la derecha (rojo)
+  if (isLocalCreator) {
+    // Yo soy el creador (azul) → izquierda
+    document.getElementById('local-player-name').textContent = localName.toUpperCase();
+    document.getElementById('remote-player-name').textContent = remoteName.toUpperCase();
+  } else {
+    // Yo me uní (rojo) → derecha
+    // Intercambiar posiciones en el HUD
+    document.getElementById('local-player-name').textContent = remoteName.toUpperCase();
+    document.getElementById('remote-player-name').textContent = localName.toUpperCase();
+  }
+  
+  console.log('📝 Nombres actualizados en HUD:', {
+    isLocalCreator,
+    izquierda: isLocalCreator ? localName : remoteName,
+    derecha: isLocalCreator ? remoteName : localName
   });
 }
 
@@ -518,15 +543,15 @@ function updateRemotePlayerFromData(data) {
     remote.isJumping = data.isJumping;
   }
   
-  // Actualizar puntuación en HUD
+  // Actualizar puntuación en HUD según posición
   if (data.score !== undefined) {
     remote.score = data.score;
-    document.getElementById('remote-score').textContent = data.score;
+    updateHUDScores(); // Usar función centralizada
   }
   
   if (data.fragments !== undefined) {
     remote.fragments = data.fragments;
-    document.getElementById('remote-fragments').textContent = data.fragments;
+    updateHUDScores(); // Usar función centralizada
   }
   
   // Actualizar estado de vida
@@ -559,12 +584,16 @@ function updatePlayerStatusUI(player, isAlive) {
 // ============================================
 // MANEJAR GAME OVER
 // ============================================
-function handleGameOver(winnerId) {
+export function handleGameOver(winnerId) {
   mpGameState.isGameOver = true;
   mpGameState.isPaused = true;
   
   const isLocalWinner = winnerId === mpGameState.localPlayerId;
   const isDraw = winnerId === 'draw';
+  
+  // Obtener nombres de jugadores
+  const localName = document.getElementById('local-player-name').textContent;
+  const remoteName = document.getElementById('remote-player-name').textContent;
   
   // Mostrar overlay
   const overlay = document.getElementById('gameover-overlay');
@@ -580,11 +609,11 @@ function handleGameOver(winnerId) {
   } else if (isLocalWinner) {
     content.className = 'gameover-content winner';
     title.textContent = '¡VICTORIA!';
-    message.textContent = 'Has derrotado a tu oponente';
+    message.textContent = `${localName} ha ganado la partida`;
   } else {
     content.className = 'gameover-content loser';
     title.textContent = 'DERROTA';
-    message.textContent = 'Tu oponente ha ganado esta vez';
+    message.textContent = `${remoteName} ha ganado la partida`;
   }
   
   // Mostrar puntuaciones finales
@@ -594,6 +623,12 @@ function handleGameOver(winnerId) {
   document.getElementById('final-remote-fragments').textContent = mpGameState.players.remote.fragments;
   
   overlay.style.display = 'flex';
+  
+  console.log('🏁 Game Over mostrado:', {
+    winner: isLocalWinner ? 'local' : 'remote',
+    localScore: mpGameState.players.local.score,
+    remoteScore: mpGameState.players.remote.score
+  });
 }
 
 // ============================================
@@ -677,7 +712,9 @@ function updateScoreByDistance() {
   if (now - lastScoreUpdate >= SCORE_UPDATE_INTERVAL) {
     if (mpGameState.players.local.isAlive) {
       mpGameState.addScore(1, 'local');
-      document.getElementById('local-score').textContent = mpGameState.players.local.score;
+      
+      // Actualizar HUD según quién es el creador
+      updateHUDScores();
       
       // Sincronizar score cada 10 puntos para no sobrecargar Firebase
       if (mpGameState.players.local.score % 10 === 0) {
@@ -688,6 +725,23 @@ function updateScoreByDistance() {
       }
     }
     lastScoreUpdate = now;
+  }
+}
+
+// Función para actualizar HUD según posición
+function updateHUDScores() {
+  if (isLocalCreator) {
+    // Soy creador (azul, izquierda) → mis puntos van a la izquierda
+    document.getElementById('local-score').textContent = mpGameState.players.local.score;
+    document.getElementById('local-fragments').textContent = mpGameState.players.local.fragments;
+    document.getElementById('remote-score').textContent = mpGameState.players.remote.score;
+    document.getElementById('remote-fragments').textContent = mpGameState.players.remote.fragments;
+  } else {
+    // Me uní (rojo, derecha) → mis puntos van a la DERECHA
+    document.getElementById('remote-score').textContent = mpGameState.players.local.score;
+    document.getElementById('remote-fragments').textContent = mpGameState.players.local.fragments;
+    document.getElementById('local-score').textContent = mpGameState.players.remote.score;
+    document.getElementById('local-fragments').textContent = mpGameState.players.remote.fragments;
   }
 }
 

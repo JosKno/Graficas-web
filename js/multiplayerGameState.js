@@ -194,8 +194,10 @@ class MultiplayerGameState {
       p.animations.current = p.animations.fall;
     }
     
-    // Verificar si hay un ganador
-    this.checkWinner();
+    // Terminar el juego inmediatamente para ambos
+    // El que murió pierde, el otro gana
+    const winner = player === 'local' ? 'remote' : 'local';
+    this.declareWinner(winner);
   }
   
   checkWinner() {
