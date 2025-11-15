@@ -268,6 +268,9 @@
             GoogleAuthProvider,
             onAuthStateChanged 
         } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { 
+            getDatabase 
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         // TODO: Reemplaza con tu configuración de Firebase
         // Ve a: https://console.firebase.google.com/
@@ -285,6 +288,12 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const googleProvider = new GoogleAuthProvider();
+        
+        // Initialize Realtime Database para multiplayer
+        const database = getDatabase(app);
+        // Hacer database global para acceso desde otros archivos
+        window.firebaseDB = database;
+        console.log('✅ Firebase Realtime Database inicializado');
 
         // Elementos del DOM
         const loginForm = document.getElementById('login-form');
@@ -376,9 +385,17 @@
                 const user = userCredential.user;
                 saveUserData(user);
 
+                // Verificar si viene del modo multiplayer
+                const urlParams = new URLSearchParams(window.location.search);
+                const mode = urlParams.get('mode');
+
                 // Redirigir después de 1 segundo
                 setTimeout(() => {
-                    window.location.href = 'nivel.html';
+                    if (mode === 'multiplayer') {
+                        window.location.href = 'lobby.html';
+                    } else {
+                        window.location.href = 'nivel.html';
+                    }
                 }, 1000);
 
             } catch (error) {
@@ -426,8 +443,16 @@
                 saveUserData(user, user.displayName);
                 showSuccess('¡Sesión iniciada con Google! Redirigiendo...');
                 
+                // Verificar si viene del modo multiplayer
+                const urlParams = new URLSearchParams(window.location.search);
+                const mode = urlParams.get('mode');
+                
                 setTimeout(() => {
-                    window.location.href = 'nivel.html';
+                    if (mode === 'multiplayer') {
+                        window.location.href = 'lobby.html';
+                    } else {
+                        window.location.href = 'nivel.html';
+                    }
                 }, 1000);
                 
             } catch (error) {
@@ -448,8 +473,16 @@
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 console.log('Usuario ya autenticado:', user.email);
-                // Opcional: redirigir automáticamente
-                // window.location.href = 'nivel.html';
+                
+                // Verificar si viene del modo multiplayer
+                const urlParams = new URLSearchParams(window.location.search);
+                const mode = urlParams.get('mode');
+                
+                if (mode === 'multiplayer') {
+                    console.log('Redirigiendo a lobby multiplayer...');
+                    window.location.href = 'lobby.html';
+                }
+                // Si no, no redirigir automáticamente (dejar que el usuario elija)
             }
         });
 

@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chrono-Dash: Lobby Multiplayer</title>
+    <link rel="stylesheet" href="stylesj.css">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
+    <style>
+        .lobby-container {
+            background-color: rgba(0, 0, 0, 0.8);
+            border: 3px solid #00e0b3;
+            border-radius: 15px;
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .lobby-title {
+            font-size: 2.5rem;
+            color: #00e0b3;
+            text-shadow: 0 0 15px #00e0b3;
+            margin-bottom: 10px;
+        }
+
+        .lobby-subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 30px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .tab-button {
+            padding: 12px 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(0, 224, 179, 0.3);
+            color: #fff;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-button.active {
+            background: #00e0b3;
+            color: #0d1223;
+            border-color: #00e0b3;
+        }
+
+        .tab-button:hover:not(.active) {
+            background: rgba(0, 224, 179, 0.2);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .rooms-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        .room-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(0, 224, 179, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .room-card:hover {
+            background: rgba(0, 224, 179, 0.1);
+            border-color: #00e0b3;
+        }
+
+        .room-info {
+            text-align: left;
+        }
+
+        .room-name {
+            font-size: 1.2rem;
+            color: #fff;
+            margin-bottom: 5px;
+        }
+
+        .room-details {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .join-button {
+            padding: 10px 25px;
+            background: #00e0b3;
+            border: none;
+            color: #0d1223;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .join-button:hover {
+            background: #00ffc8;
+            transform: translateY(-2px);
+        }
+
+        .create-room-form {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(0, 224, 179, 0.3);
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            color: #fff;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(0, 224, 179, 0.3);
+            color: #fff;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+            border-radius: 5px;
+        }
+
+        .form-group select option {
+            background: #0d1223;
+            color: #fff;
+        }
+
+        .create-button {
+            width: 100%;
+            padding: 15px;
+            background: #00e0b3;
+            border: none;
+            color: #0d1223;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .create-button:hover {
+            background: #00ffc8;
+            transform: translateY(-2px);
+        }
+
+        .create-button:disabled {
+            background: rgba(0, 224, 179, 0.3);
+            cursor: not-allowed;
+        }
+
+        .waiting-room {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid #00e0b3;
+            border-radius: 10px;
+            padding: 30px;
+            margin-top: 20px;
+        }
+
+        .players-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .player-card {
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .player-card.blue {
+            border-color: #00b8ff;
+        }
+
+        .player-card.red {
+            border-color: #ff4757;
+        }
+
+        .player-card.ready {
+            border-width: 3px;
+            box-shadow: 0 0 20px rgba(0, 224, 179, 0.5);
+        }
+
+        .player-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+        }
+
+        .player-avatar.blue {
+            background: linear-gradient(135deg, #00b8ff, #0084ff);
+        }
+
+        .player-avatar.red {
+            background: linear-gradient(135deg, #ff4757, #ff2f42);
+        }
+
+        .player-name {
+            font-size: 1.3rem;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        .player-status {
+            font-size: 0.9rem;
+            padding: 5px 15px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .player-status.ready {
+            background: rgba(0, 224, 179, 0.3);
+            color: #00e0b3;
+        }
+
+        .player-status.waiting {
+            background: rgba(255, 165, 0, 0.3);
+            color: #ffa500;
+        }
+
+        .ready-button {
+            width: 100%;
+            padding: 15px;
+            background: #00e0b3;
+            border: none;
+            color: #0d1223;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+
+        .ready-button:hover {
+            background: #00ffc8;
+        }
+
+        .ready-button.ready {
+            background: rgba(255, 165, 0, 0.5);
+        }
+
+        .leave-button {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 71, 87, 0.3);
+            border: 2px solid #ff4757;
+            color: #fff;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .leave-button:hover {
+            background: rgba(255, 71, 87, 0.5);
+        }
+
+        .empty-state {
+            padding: 40px;
+            color: rgba(255, 255, 255, 0.5);
+            text-align: center;
+        }
+
+        .loading {
+            color: #00e0b3;
+            font-size: 1.2rem;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .error-message {
+            background: rgba(255, 71, 87, 0.2);
+            border: 2px solid #ff4757;
+            color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="lobby-container">
+            <h1 class="lobby-title">LOBBY MULTIPLAYER</h1>
+            <p class="lobby-subtitle">Encuentra oponentes y compite en tiempo real</p>
+
+            <!-- Mensaje de error -->
+            <div id="error-message" class="error-message" style="display: none;"></div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab-button active" data-tab="find">BUSCAR SALA</button>
+                <button class="tab-button" data-tab="create">CREAR SALA</button>
+            </div>
+
+            <!-- Tab: Buscar Sala -->
+            <div id="tab-find" class="tab-content active">
+                <div id="loading-rooms" class="loading">Buscando salas disponibles...</div>
+                <div id="rooms-list" class="rooms-list" style="display: none;"></div>
+                <div id="empty-rooms" class="empty-state" style="display: none;">
+                    <p>No hay salas disponibles</p>
+                    <p style="font-size: 0.9rem;">Crea una nueva sala para comenzar</p>
+                </div>
+                <button id="refresh-button" class="join-button" style="width: 100%; margin-top: 15px;">
+                    🔄 ACTUALIZAR
+                </button>
+            </div>
+
+            <!-- Tab: Crear Sala -->
+            <div id="tab-create" class="tab-content">
+                <div class="create-room-form">
+                    <div class="form-group">
+                        <label for="level-select">Selecciona el Nivel</label>
+                        <select id="level-select">
+                            <option value="1">🌲 Nivel 1 - Bosque Místico</option>
+                            <option value="2">🏙️ Nivel 2 - Ciudad Neón</option>
+                            <option value="3">🌋 Nivel 3 - Volcán Infernal</option>
+                        </select>
+                    </div>
+                    <button id="create-room-button" class="create-button">
+                        CREAR SALA
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sala de Espera (oculta por defecto) -->
+            <div id="waiting-room" class="waiting-room" style="display: none;">
+                <h2 style="color: #00e0b3; margin-bottom: 20px;">SALA DE ESPERA</h2>
+                <p id="room-id-display" style="color: rgba(255, 255, 255, 0.6); margin-bottom: 20px;"></p>
+                
+                <div class="players-grid" id="players-grid">
+                    <!-- Jugadores se cargan dinámicamente -->
+                </div>
+
+                <button id="ready-button" class="ready-button">LISTO PARA JUGAR</button>
+                <button id="leave-room-button" class="leave-button">SALIR DE LA SALA</button>
+            </div>
+
+            <a href="jugadores.html" class="back-button" style="display: block; margin-top: 30px;">REGRESAR</a>
+        </div>
+    </div>
+
+    <!-- Firebase y Room Manager -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getDatabase } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { initRoomManager, getRoomManager } from './js/roomManager.js';
+
+        // Configuración de Firebase (misma que login.html)
+        // ⚠️ IMPORTANTE: Reemplaza esto con tu configuración real de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDEz_ksRtjc1jz-8UPY9zX1K1PxjBGWex8",
+            authDomain: "chrono-dash-b249a.firebaseapp.com",
+            projectId: "chrono-dash-b249a",
+            storageBucket: "chrono-dash-b249a.firebasestorage.app",
+            messagingSenderId: "69705398644",
+            appId: "1:69705398644:web:8a7d5563f5b11f54395421",
+            measurementId: "G-1ZFS84X0NL"
+            };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const database = getDatabase(app);
+        const roomManager = initRoomManager(database);
+
+        let currentUser = null;
+        let currentRoomId = null;
+        let isReady = false;
+        let authChecked = false; // Bandera para evitar múltiples redirecciones
+
+        // Mostrar mensaje de carga inicial
+        const loadingMessage = document.createElement('div');
+        loadingMessage.className = 'loading';
+        loadingMessage.textContent = 'Verificando autenticación...';
+        loadingMessage.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 40px;
+            border-radius: 10px;
+            border: 2px solid #00e0b3;
+            z-index: 10000;
+        `;
+        document.body.appendChild(loadingMessage);
+
+        // Verificar autenticación
+        onAuthStateChanged(auth, (user) => {
+            // Remover mensaje de carga
+            if (loadingMessage && loadingMessage.parentNode) {
+                loadingMessage.parentNode.removeChild(loadingMessage);
+            }
+
+            if (user) {
+                currentUser = user;
+                authChecked = true;
+                console.log('✅ Usuario autenticado:', user.email);
+                
+                // Guardar en localStorage también
+                localStorage.setItem('firebaseUid', user.uid);
+                localStorage.setItem('userEmail', user.email);
+                localStorage.setItem('playerName', user.displayName || user.email.split('@')[0].toUpperCase());
+                
+                loadRooms();
+            } else {
+                authChecked = true;
+                
+                // Verificar localStorage como respaldo
+                const storedUid = localStorage.getItem('firebaseUid');
+                
+                if (storedUid && storedUid !== 'null') {
+                    console.log('⚠️ Auth state null pero hay datos en localStorage, esperando...');
+                    // Esperar un momento por si Firebase está cargando
+                    setTimeout(() => {
+                        if (!currentUser) {
+                            console.log('❌ Auth definitivamente null, redirigiendo...');
+                            alert('Debes iniciar sesión para jugar en modo multijugador');
+                            window.location.href = 'login.html?mode=multiplayer';
+                        }
+                    }, 2000);
+                } else {
+                    console.log('❌ No hay usuario autenticado');
+                    alert('Debes iniciar sesión para jugar en modo multijugador');
+                    window.location.href = 'login.html?mode=multiplayer';
+                }
+            }
+        });
+
+        // Manejo de tabs
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const tabName = button.dataset.tab;
+                
+                document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                document.getElementById(`tab-${tabName}`).classList.add('active');
+            });
+        });
+
+        // Cargar salas disponibles
+        async function loadRooms() {
+            const loadingEl = document.getElementById('loading-rooms');
+            const roomsListEl = document.getElementById('rooms-list');
+            const emptyEl = document.getElementById('empty-rooms');
+
+            loadingEl.style.display = 'block';
+            roomsListEl.style.display = 'none';
+            emptyEl.style.display = 'none';
+
+            const rooms = await roomManager.findAvailableRooms();
+
+            loadingEl.style.display = 'none';
+
+            console.log('📊 Salas recibidas:', rooms);
+
+            if (rooms.length === 0) {
+                emptyEl.style.display = 'block';
+            } else {
+                roomsListEl.style.display = 'block';
+                roomsListEl.innerHTML = '';
+
+                rooms.forEach(room => {
+                    const levelNames = {
+                        1: '🌲 Bosque Místico',
+                        2: '🏙️ Ciudad Neón',
+                        3: '🌋 Volcán Infernal'
+                    };
+
+                    // Validar que room.players exista
+                    if (!room.players || typeof room.players !== 'object') {
+                        console.warn('Sala sin jugadores válidos:', room.roomId);
+                        return; // Saltar esta sala
+                    }
+
+                    const playerCount = Object.keys(room.players).length;
+                    const playersArray = Object.values(room.players);
+                    
+                    // Validar que haya al menos un jugador
+                    if (playersArray.length === 0) {
+                        console.warn('Sala vacía:', room.roomId);
+                        return; // Saltar esta sala
+                    }
+                    
+                    const creator = playersArray[0];
+
+                    const roomCard = document.createElement('div');
+                    roomCard.className = 'room-card';
+                    roomCard.innerHTML = `
+                        <div class="room-info">
+                            <div class="room-name">${levelNames[room.level] || 'Nivel Desconocido'}</div>
+                            <div class="room-details">
+                                Creado por: ${creator?.name || 'Desconocido'} | 
+                                Jugadores: ${playerCount}/2
+                            </div>
+                        </div>
+                        <button class="join-button" onclick="joinRoom('${room.roomId}')">
+                            UNIRSE
+                        </button>
+                    `;
+
+                    roomsListEl.appendChild(roomCard);
+                });
+            }
+        }
+
+        // Unirse a sala
+        window.joinRoom = async function(roomId) {
+            const userName = localStorage.getItem('playerName') || currentUser.displayName || 'JUGADOR';
+            
+            const result = await roomManager.joinRoom(
+                roomId,
+                currentUser.uid,
+                userName,
+                currentUser.email
+            );
+
+            if (result.success) {
+                currentRoomId = roomId;
+                showWaitingRoom(roomId);
+            } else {
+                showError(result.error);
+            }
+        };
+
+        // Crear sala
+        document.getElementById('create-room-button').addEventListener('click', async () => {
+            const level = parseInt(document.getElementById('level-select').value);
+            const userName = localStorage.getItem('playerName') || currentUser.displayName || 'JUGADOR';
+            
+            document.getElementById('create-room-button').disabled = true;
+            document.getElementById('create-room-button').textContent = 'CREANDO...';
+
+            const result = await roomManager.createRoom(
+                currentUser.uid,
+                userName,
+                currentUser.email,
+                level
+            );
+
+            document.getElementById('create-room-button').disabled = false;
+            document.getElementById('create-room-button').textContent = 'CREAR SALA';
+
+            if (result.success) {
+                currentRoomId = result.roomId;
+                showWaitingRoom(result.roomId);
+            } else {
+                showError(result.error);
+            }
+        });
+
+        // Mostrar sala de espera
+        function showWaitingRoom(roomId) {
+            document.getElementById('tab-find').style.display = 'none';
+            document.getElementById('tab-create').style.display = 'none';
+            document.querySelector('.tabs').style.display = 'none';
+            document.getElementById('waiting-room').style.display = 'block';
+            document.getElementById('room-id-display').textContent = `ID de Sala: ${roomId}`;
+
+            // Escuchar cambios en la sala
+            roomManager.listenToRoom(roomId, (room) => {
+                if (!room) {
+                    console.warn('Sala no encontrada o eliminada');
+                    return;
+                }
+
+                // Validar que room.players exista
+                if (!room.players || typeof room.players !== 'object') {
+                    console.warn('Sala sin jugadores:', room);
+                    return;
+                }
+
+                updatePlayersGrid(room.players);
+
+                // Verificar si ambos jugadores están listos
+                const players = Object.values(room.players);
+                if (players.length === 2 && players.every(p => p.ready)) {
+                    // Iniciar juego
+                    setTimeout(() => {
+                        window.location.href = `nivel_multiplayer.html?room=${roomId}`;
+                    }, 2000);
+                }
+
+                // Si el otro jugador salió
+                if (players.length === 1 && Object.keys(room.players)[0] !== currentUser.uid) {
+                    alert('El otro jugador salió de la sala');
+                    leaveRoom();
+                }
+            });
+        }
+
+        // Actualizar grilla de jugadores
+        function updatePlayersGrid(players) {
+            const gridEl = document.getElementById('players-grid');
+            gridEl.innerHTML = '';
+
+            // Validar que players exista y sea un objeto
+            if (!players || typeof players !== 'object') {
+                console.warn('Players inválido:', players);
+                players = {}; // Usar objeto vacío como fallback
+            }
+
+            const playerArray = Object.values(players);
+            const maxPlayers = 2;
+
+            for (let i = 0; i < maxPlayers; i++) {
+                const player = playerArray[i];
+                const card = document.createElement('div');
+                
+                if (player) {
+                    card.className = `player-card ${player.color}${player.ready ? ' ready' : ''}`;
+                    card.innerHTML = `
+                        <div class="player-avatar ${player.color}">
+                            ${player.color === 'blue' ? '🔵' : '🔴'}
+                        </div>
+                        <div class="player-name">${player.name}</div>
+                        <div class="player-status ${player.ready ? 'ready' : 'waiting'}">
+                            ${player.ready ? '✅ LISTO' : '⏳ ESPERANDO'}
+                        </div>
+                    `;
+                } else {
+                    card.className = 'player-card';
+                    card.innerHTML = `
+                        <div class="player-avatar" style="background: rgba(255, 255, 255, 0.1);">
+                            ❓
+                        </div>
+                        <div class="player-name" style="color: rgba(255, 255, 255, 0.5);">
+                            Esperando jugador...
+                        </div>
+                    `;
+                }
+
+                gridEl.appendChild(card);
+            }
+        }
+
+        // Botón Ready
+        document.getElementById('ready-button').addEventListener('click', async () => {
+            isReady = !isReady;
+            
+            await roomManager.setPlayerReady(currentRoomId, currentUser.uid, isReady);
+            
+            const button = document.getElementById('ready-button');
+            if (isReady) {
+                button.textContent = 'CANCELAR';
+                button.classList.add('ready');
+            } else {
+                button.textContent = 'LISTO PARA JUGAR';
+                button.classList.remove('ready');
+            }
+        });
+
+        // Salir de sala
+        document.getElementById('leave-room-button').addEventListener('click', leaveRoom);
+
+        async function leaveRoom() {
+            if (currentRoomId) {
+                await roomManager.leaveRoom(currentRoomId, currentUser.uid);
+            }
+            window.location.reload();
+        }
+
+        // Actualizar salas
+        document.getElementById('refresh-button').addEventListener('click', loadRooms);
+
+        // Mostrar errores
+        function showError(message) {
+            const errorEl = document.getElementById('error-message');
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+            setTimeout(() => {
+                errorEl.style.display = 'none';
+            }, 5000);
+        }
+
+        // Limpiar al salir
+        window.addEventListener('beforeunload', () => {
+            if (currentRoomId && currentUser) {
+                roomManager.leaveRoom(currentRoomId, currentUser.uid);
+            }
+        });
+
+        document.body.classList.add('fade-in');
+    </script>
+</body>
+</html>
