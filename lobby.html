@@ -419,6 +419,7 @@
         let currentUser = null;
         let currentRoomId = null;
         let isReady = false;
+        let isGoingToGame = false;
         let authChecked = false; // Bandera para evitar múltiples redirecciones
 
         // Mostrar mensaje de carga inicial
@@ -635,6 +636,12 @@ if (players.length === 2 && players.every(p => p.ready)) {
     // Iniciar juego con parámetros correctos
     console.log('🎮 ¡Ambos jugadores listos! Iniciando partida...');
     
+    // IMPORTANTE: Marcar que vamos al juego, NO saliendo
+    isGoingToGame = true;
+    
+    // Detener listener de la sala para evitar problemas
+    roomManager.stopListening(roomId);
+    
     // Actualizar estado de la sala a 'playing'
     roomManager.startGame(roomId).then(() => {
         // Redirigir al nivel multiplayer con roomId y level
@@ -737,11 +744,15 @@ if (players.length === 2 && players.every(p => p.ready)) {
         }
 
         // Limpiar al salir
-        window.addEventListener('beforeunload', () => {
-            if (currentRoomId && currentUser) {
-                roomManager.leaveRoom(currentRoomId, currentUser.uid);
-            }
-        });
+window.addEventListener('beforeunload', () => {
+    // NO eliminar jugador si estamos yendo al juego
+    if (!isGoingToGame && currentRoomId && currentUser) {
+        console.log('🚪 Saliendo de lobby, limpiando sala...');
+        roomManager.leaveRoom(currentRoomId, currentUser.uid);
+    } else if (isGoingToGame) {
+        console.log('🎮 Yendo al juego, NO se elimina jugador');
+    }
+});
 
         document.body.classList.add('fade-in');
     </script>

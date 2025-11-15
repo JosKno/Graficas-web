@@ -19,7 +19,7 @@ class MultiplayerSync {
         
         // Throttling para evitar demasiadas actualizaciones
         this.lastUpdate = 0;
-        this.updateInterval = 50; // ms (20 actualizaciones por segundo)
+        this.updateInterval = 16; // ms (~60 FPS en lugar de 20)
         
         this.isInitialized = false;
     }

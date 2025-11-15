@@ -8,7 +8,6 @@ import { getLevelConfig } from '../config.js';
 import mpGameState from './multiplayerGameState.js';
 import { getMultiplayerSync } from './multiplayerSync.js';
 import { loadRunnerMultiplayer } from './multiplayerSceneSetup.js';
-import { spawnObjects } from '../spawner.js';
 import { updateAllMultiplayer } from './multiplayerUpdater.js';
 import { showCountdown } from '../countdown.js';
 
@@ -16,6 +15,9 @@ let animationFrameId = null;
 const multiplayerSync = getMultiplayerSync();
 const loader = new GLTFLoader();
 const textureLoader = new THREE.TextureLoader();
+
+// NOTA: NO importamos spawner.js porque usa gameState single player
+// En su lugar, crearemos los objetos directamente aquí
 
 // ============================================
 // OBTENER DATOS DE LA SALA DESDE URL
@@ -70,17 +72,42 @@ async function init() {
   }
 
   // Obtener información de la sala desde Firebase
-  const roomInfo = await getRoomInfo(roomId);
+  let roomInfo = await getRoomInfo(roomId);
   if (!roomInfo) {
     alert('Sala no encontrada');
     window.location.href = 'lobby.html';
     return;
   }
 
+  console.log('📊 Estado de la sala:', roomInfo.status);
+
+  // Si la sala aún está en "waiting", esperar a que cambie a "playing"
+  if (roomInfo.status === 'waiting') {
+    console.log('⏳ Sala en estado "waiting", esperando a que inicie...');
+    
+    // Esperar máximo 10 segundos a que la sala cambie a "playing"
+    roomInfo = await waitForRoomToStart(roomId, 10000);
+    
+    if (!roomInfo) {
+      alert('La sala no se pudo iniciar. Volviendo al lobby...');
+      window.location.href = 'lobby.html';
+      return;
+    }
+  }
+
   // Validar que la sala tenga jugadores
   if (!roomInfo.players || typeof roomInfo.players !== 'object') {
     console.error('❌ Sala sin jugadores:', roomInfo);
     alert('Error: La sala no tiene jugadores configurados');
+    window.location.href = 'lobby.html';
+    return;
+  }
+
+  // Validar que haya exactamente 2 jugadores
+  const playerCount = Object.keys(roomInfo.players).length;
+  if (playerCount !== 2) {
+    console.error('❌ La sala debe tener exactamente 2 jugadores. Tiene:', playerCount);
+    alert(`Error: La sala tiene ${playerCount} jugador(es). Se necesitan 2 jugadores.`);
     window.location.href = 'lobby.html';
     return;
   }
@@ -222,6 +249,50 @@ function waitForFirebase() {
 }
 
 // ============================================
+// ESPERAR A QUE LA SALA INICIE
+// ============================================
+async function waitForRoomToStart(roomId, timeout = 10000) {
+  const { ref, onValue, off } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js");
+  
+  return new Promise((resolve) => {
+    const roomRef = ref(window.firebaseDB, `rooms/${roomId}`);
+    let timeoutId;
+    let unsubscribe;
+    
+    // Función de limpieza
+    const cleanup = () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      if (unsubscribe) unsubscribe();
+    };
+    
+    // Timeout
+    timeoutId = setTimeout(() => {
+      cleanup();
+      console.error('⏱️ Timeout esperando que la sala inicie');
+      resolve(null);
+    }, timeout);
+    
+    // Escuchar cambios en tiempo real
+    unsubscribe = onValue(roomRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const room = snapshot.val();
+        console.log('📊 Estado actual de sala:', room.status);
+        
+        if (room.status === 'playing') {
+          console.log('✅ Sala lista para jugar!');
+          cleanup();
+          resolve(room);
+        }
+      } else {
+        console.error('❌ Sala eliminada mientras esperábamos');
+        cleanup();
+        resolve(null);
+      }
+    });
+  });
+}
+
+// ============================================
 // OBTENER INFORMACIÓN DE LA SALA
 // ============================================
 async function getRoomInfo(roomId) {
@@ -251,11 +322,28 @@ async function getRoomInfo(roomId) {
 // ACTUALIZAR NOMBRES EN HUD
 // ============================================
 function updatePlayerNames(roomInfo, localPlayerId, remotePlayerId) {
-  const localName = roomInfo.players[localPlayerId].name || 'TÚ';
-  const remoteName = roomInfo.players[remotePlayerId].name || 'OPONENTE';
+  // Validar que los jugadores existan en roomInfo
+  const localPlayerData = roomInfo.players?.[localPlayerId];
+  const remotePlayerData = roomInfo.players?.[remotePlayerId];
+  
+  if (!localPlayerData) {
+    console.warn('⚠️ Jugador local no encontrado en sala. Usando nombre por defecto.');
+  }
+  
+  if (!remotePlayerData) {
+    console.warn('⚠️ Jugador remoto no encontrado en sala. Usando nombre por defecto.');
+  }
+  
+  const localName = localPlayerData?.name || 'TÚ';
+  const remoteName = remotePlayerData?.name || 'OPONENTE';
   
   document.getElementById('local-player-name').textContent = localName.toUpperCase();
   document.getElementById('remote-player-name').textContent = remoteName.toUpperCase();
+  
+  console.log('📝 Nombres actualizados:', {
+    local: localName,
+    remote: remoteName
+  });
 }
 
 // ============================================
@@ -387,6 +475,19 @@ function startSynchronization() {
     if (roomData.status === 'finished' && roomData.winner && !mpGameState.isGameOver) {
       handleGameOver(roomData.winner);
     }
+    
+    // Detectar si el oponente salió
+    if (roomData.players) {
+      const playerCount = Object.keys(roomData.players).length;
+      if (playerCount < 2 && !mpGameState.isGameOver) {
+        console.log('💨 El oponente abandonó la partida');
+        
+        // Si el jugador local aún está vivo, declarar victoria
+        if (mpGameState.players.local.isAlive) {
+          multiplayerSync.declareWinner(mpGameState.localPlayerId);
+        }
+      }
+    }
   });
 }
 
@@ -396,16 +497,20 @@ function startSynchronization() {
 function updateRemotePlayerFromData(data) {
   const remote = mpGameState.players.remote;
   
-  // Actualizar posición
+  // Actualizar posición con interpolación suave
   if (data.position && remote.runner) {
-    remote.runner.position.x = data.position.x;
-    remote.runner.position.y = data.position.y;
-    remote.runner.position.z = data.position.z;
+    // Interpolación para movimiento suave
+    const lerpFactor = 0.3; // Factor de suavizado (0-1, más alto = más rápido)
+    
+    remote.runner.position.x += (data.position.x - remote.runner.position.x) * lerpFactor;
+    remote.runner.position.y += (data.position.y - remote.runner.position.y) * lerpFactor;
+    remote.runner.position.z += (data.position.z - remote.runner.position.z) * lerpFactor;
   }
   
-  // Actualizar carril
+  // Actualizar carril (esto ayuda con el movimiento lateral)
   if (data.lane !== undefined) {
     remote.currentLane = data.lane;
+    remote.targetLaneX = [-3, 0, 3][data.lane]; // GAME_CONFIG.lanes
   }
   
   // Actualizar estado de salto
@@ -514,8 +619,13 @@ function animate() {
   // Actualizar todos los objetos del juego
   updateAllMultiplayer(delta);
 
-  // Generar nuevos objetos
-  spawnObjects();
+  // Generar nuevos objetos (solo si jugador local está vivo)
+  if (mpGameState.players.local.isAlive) {
+    spawnObjectsMultiplayer();
+  }
+  
+  // Actualizar puntuación por distancia (solo jugador local)
+  updateScoreByDistance();
   
   // Sincronizar posición del jugador local
   const localRunner = mpGameState.players.local.runner;
@@ -557,6 +667,257 @@ window.addEventListener('beforeunload', () => {
 // ============================================
 // FUNCIONES AUXILIARES DE SCENE SETUP
 // ============================================
+
+// Variables para puntuación por distancia
+let lastScoreUpdate = Date.now();
+const SCORE_UPDATE_INTERVAL = 100; // cada 100ms = 1 punto
+
+function updateScoreByDistance() {
+  const now = Date.now();
+  if (now - lastScoreUpdate >= SCORE_UPDATE_INTERVAL) {
+    if (mpGameState.players.local.isAlive) {
+      mpGameState.addScore(1, 'local');
+      document.getElementById('local-score').textContent = mpGameState.players.local.score;
+      
+      // Sincronizar score cada 10 puntos para no sobrecargar Firebase
+      if (mpGameState.players.local.score % 10 === 0) {
+        multiplayerSync.updateLocalScore(
+          mpGameState.players.local.score,
+          mpGameState.players.local.fragments
+        );
+      }
+    }
+    lastScoreUpdate = now;
+  }
+}
+
+// Función auxiliar para agregar emissive a modelos
+function addEmissiveToModel(model, color, intensity) {
+  model.traverse((child) => {
+    if (child.isMesh && child.material) {
+      child.material.emissive = new THREE.Color(color);
+      child.material.emissiveIntensity = intensity;
+      child.castShadow = true;
+      child.receiveShadow = true;
+    }
+  });
+}
+
+// Sistema de spawn para multiplayer
+function spawnObjectsMultiplayer() {
+  if (!mpGameState.isGameStarted || !mpGameState.levelConfig || mpGameState.isGameOver) return;
+  
+  const GAME_CONFIG = {
+    lanes: [-3, 0, 3],
+    spawnDistance: -80
+  };
+  
+  const spawnRates = mpGameState.levelConfig.spawnRates;
+  
+  // Spawn obstáculos
+  if (Math.random() < spawnRates.obstacle) {
+    spawnObstacleMP();
+  }
+
+  // Spawn monedas
+  if (Math.random() < spawnRates.coin) {
+    spawnCoinMP();
+  }
+
+  // Spawn powerups buenos
+  if (Math.random() < spawnRates.powerupGood) {
+    spawnPowerupGoodMP();
+  }
+
+  // Spawn powerups malos
+  if (Math.random() < spawnRates.powerupBad) {
+    spawnPowerupBadMP();
+  }
+  
+  // Spawn bombas
+  if (Math.random() < spawnRates.bomb) {
+    spawnBombMP();
+  }
+}
+
+function spawnObstacleMP() {
+  const levelConfig = mpGameState.levelConfig;
+  const GAME_CONFIG = { lanes: [-3, 0, 3], spawnDistance: -80 };
+  
+  loader.load(
+    levelConfig.obstacle.path,
+    (model) => {
+      const obstacle = model.scene;
+      obstacle.scale.set(
+        levelConfig.obstacle.scale.x,
+        levelConfig.obstacle.scale.y,
+        levelConfig.obstacle.scale.z
+      );
+      
+      const randomLane = GAME_CONFIG.lanes[Math.floor(Math.random() * GAME_CONFIG.lanes.length)];
+      obstacle.position.set(randomLane, levelConfig.obstacle.yOffset, GAME_CONFIG.spawnDistance);
+      
+      obstacle.traverse((child) => {
+        if (child.isMesh) {
+          child.castShadow = true;
+          child.receiveShadow = true;
+        }
+      });
+      
+      if (levelConfig.obstacle.emissiveColor) {
+        addEmissiveToModel(obstacle, levelConfig.obstacle.emissiveColor, levelConfig.obstacle.emissiveIntensity);
+      }
+      
+      mpGameState.scene.add(obstacle);
+      mpGameState.obstacles.push({ mesh: obstacle, type: 'obstacle', lane: randomLane });
+    },
+    undefined,
+    (error) => {
+      const tempGeometry = new THREE.BoxGeometry(1.5, 2, 1.5);
+      const tempMaterial = new THREE.MeshStandardMaterial({ color: "#ff4757" });
+      const tempObstacle = new THREE.Mesh(tempGeometry, tempMaterial);
+      const randomLane = GAME_CONFIG.lanes[Math.floor(Math.random() * GAME_CONFIG.lanes.length)];
+      tempObstacle.position.set(randomLane, 1, GAME_CONFIG.spawnDistance);
+      tempObstacle.castShadow = true;
+      mpGameState.scene.add(tempObstacle);
+      mpGameState.obstacles.push({ mesh: tempObstacle, type: 'obstacle', lane: randomLane });
+    }
+  );
+}
+
+function spawnCoinMP() {
+  const levelConfig = mpGameState.levelConfig;
+  const GAME_CONFIG = { lanes: [-3, 0, 3], spawnDistance: -80 };
+  
+  loader.load(
+    levelConfig.coin.path,
+    (model) => {
+      const coin = model.scene;
+      coin.scale.set(levelConfig.coin.scale.x, levelConfig.coin.scale.y, levelConfig.coin.scale.z);
+      
+      const randomLane = GAME_CONFIG.lanes[Math.floor(Math.random() * GAME_CONFIG.lanes.length)];
+      coin.position.set(randomLane, levelConfig.coin.yOffset, GAME_CONFIG.spawnDistance);
+      
+      addEmissiveToModel(coin, levelConfig.coin.emissiveColor, levelConfig.coin.emissiveIntensity);
+      
+      mpGameState.scene.add(coin);
+      mpGameState.coins.push({ 
+        mesh: coin, 
+        type: 'coin', 
+        lane: randomLane, 
+        rotation: 0,
+        shouldRotate: levelConfig.coin.rotate 
+      });
+    },
+    undefined,
+    (error) => {
+      const tempGeometry = new THREE.CylinderGeometry(0.5, 0.5, 0.2, 16);
+      const tempMaterial = new THREE.MeshStandardMaterial({ 
+        color: "#ffd700",
+        metalness: 0.8,
+        emissive: 0xffd700,
+        emissiveIntensity: 1.5
+      });
+      const tempCoin = new THREE.Mesh(tempGeometry, tempMaterial);
+      tempCoin.rotation.x = Math.PI / 2;
+      const randomLane = GAME_CONFIG.lanes[Math.floor(Math.random() * GAME_CONFIG.lanes.length)];
+      tempCoin.position.set(randomLane, 1, GAME_CONFIG.spawnDistance);
+      tempCoin.castShadow = true;
+      mpGameState.scene.add(tempCoin);
+      mpGameState.coins.push({ 
+        mesh: tempCoin, 
+        type: 'coin', 
+        lane: randomLane, 
+        rotation: 0,
+        shouldRotate: true 
+      });
+    }
+  );
+}
+
+function spawnPowerupGoodMP() {
+  const levelConfig = mpGameState.levelConfig;
+  const GAME_CONFIG = { lanes: [-3, 0, 3], spawnDistance: -80 };
+  
+  loader.load(
+    levelConfig.powerupGood.path,
+    (model) => {
+      const powerup = model.scene;
+      powerup.scale.set(levelConfig.powerupGood.scale.x, levelConfig.powerupGood.scale.y, levelConfig.powerupGood.scale.z);
+      
+      const randomLane = GAME_CONFIG.lanes[Math.floor(Math.random() * GAME_CONFIG.lanes.length)];
+      powerup.position.set(randomLane, levelConfig.powerupGood.yOffset, GAME_CONFIG.spawnDistance);
+      
+      addEmissiveToModel(powerup, levelConfig.powerupGood.emissiveColor, levelConfig.powerupGood.emissiveIntensity);
+      
+      mpGameState.scene.add(powerup);
+      mpGameState.powerupsGood.push({ 
+        mesh: powerup, 
+        type: 'powerupGood', 
+        lane: randomLane, 
+        rotation: 0,
+        shouldFloat: levelConfig.powerupGood.float,
+        baseY: levelConfig.powerupGood.yOffset
+      });
+    }
+  );
+}
+
+function spawnPowerupBadMP() {
+  const levelConfig = mpGameState.levelConfig;
+  const GAME_CONFIG = { lanes: [-3, 0, 3], spawnDistance: -80 };
+  
+  loader.load(
+    levelConfig.powerupBad.path,
+    (model) => {
+      const powerup = model.scene;
+      powerup.scale.set(levelConfig.powerupBad.scale.x, levelConfig.powerupBad.scale.y, levelConfig.powerupBad.scale.z);
+      
+      const randomLane = GAME_CONFIG.lanes[Math.floor(Math.random() * GAME_CONFIG.lanes.length)];
+      powerup.position.set(randomLane, levelConfig.powerupBad.yOffset, GAME_CONFIG.spawnDistance);
+      
+      addEmissiveToModel(powerup, levelConfig.powerupBad.emissiveColor, levelConfig.powerupBad.emissiveIntensity);
+      
+      mpGameState.scene.add(powerup);
+      mpGameState.powerupsBad.push({ 
+        mesh: powerup, 
+        type: 'powerupBad', 
+        lane: randomLane, 
+        rotation: 0,
+        shouldFloat: levelConfig.powerupBad.float,
+        baseY: levelConfig.powerupBad.yOffset
+      });
+    }
+  );
+}
+
+function spawnBombMP() {
+  const levelConfig = mpGameState.levelConfig;
+  const GAME_CONFIG = { lanes: [-3, 0, 3], spawnDistance: -80 };
+  
+  loader.load(
+    levelConfig.bomb.path,
+    (model) => {
+      const bomb = model.scene;
+      bomb.scale.set(levelConfig.bomb.scale.x, levelConfig.bomb.scale.y, levelConfig.bomb.scale.z);
+      
+      const randomLane = GAME_CONFIG.lanes[Math.floor(Math.random() * GAME_CONFIG.lanes.length)];
+      bomb.position.set(randomLane, levelConfig.bomb.yOffset, GAME_CONFIG.spawnDistance);
+      
+      addEmissiveToModel(bomb, levelConfig.bomb.emissiveColor, levelConfig.bomb.emissiveIntensity);
+      
+      mpGameState.scene.add(bomb);
+      mpGameState.bombs.push({ 
+        mesh: bomb, 
+        type: 'bomb', 
+        lane: randomLane, 
+        rotation: 0,
+        shouldFloat: true,
+        baseY: levelConfig.bomb.yOffset
+      });
+    }
+  );
+}
 
 function createCameraForMultiplayer(container) {
   mpGameState.camera = new THREE.PerspectiveCamera(
